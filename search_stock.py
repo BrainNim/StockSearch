@@ -15,21 +15,22 @@ start = time.time()
 
 df = pd.read_sql("select * from stocksearch.daily_market", conn)
 
+CrossFilter(conn).goldencross(5, 20, df)
 
 # 필터 0
 df0 = MarketFilter.market("KOSPI", df)
 
 # 필터 1
-df1 = PriceFilter.updown(1000, 100000, df0)
+df1 = PriceFilter(conn).updown(1000, 100000, df0)
 
 # 필터 2
-df2 = PriceFilter.compare_mean(365, 1.1, 'up', df1, conn)
+df2 = PriceFilter(conn).compare_mean(365, 1.1, 'up', df1)
 
 # 필터 3
-df3 = PriceFilter.compare_max(0.5, df2)
+df3 = PriceFilter(conn).compare_max(0.5, df2)
 
 # 필터 4
-df4 = PERFilter.top('top', 10, df3)
+df4 = PERFilter.top('top', 20, df3)
 
 print(time.time() -start)
 

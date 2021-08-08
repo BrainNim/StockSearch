@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 # connect mysql
 conn = pymysql.connect(host="localhost",
                        user="root",
-                       password="hokeysun",
+                       password="0000",
                        db="stocksearch")
 # curs = conn.cursor()
 

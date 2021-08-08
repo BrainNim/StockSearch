@@ -15,7 +15,7 @@ print('로그인 성공')
 # connect mysql
 conn = pymysql.connect(host="localhost",
                        user="root",
-                       password="hokeysun",
+                       password="0000",
                        db="stocksearch")
 curs = conn.cursor()
 

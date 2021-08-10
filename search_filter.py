@@ -163,9 +163,9 @@ class CrossFilter:
         schedule = pd.read_sql(f"""SELECT Date FROM stocksearch.past_market GROUP BY Date ORDER BY Date DESC;""", conn)
         self.recent_date = schedule.iloc[0].values[0]  # 최근 시장오픈
 
-    def goldencross(self, short, long, df):
+    def get_cross_sql(self, short, long):
         short, long = int(short), int(long)
-        goldencross_sql = f"""select TS.ID, TS, TL, YS, YL from 
+        cross_sql = f"""select TS.ID, TS, TL, YS, YL from 
                             (SELECT ID, AVG(Close) as TS FROM stocksearch.past_market 
                                                         WHERE Date >= Date(subdate("{self.recent_date}", INTERVAL {short} DAY))
                                                         GROUP BY ID) as TS
@@ -175,12 +175,16 @@ class CrossFilter:
                                                         GROUP BY ID) as TL on TS.ID = TL.ID
                             join
                             (SELECT ID, AVG(Close) as YS FROM stocksearch.past_market 
-                                                        WHERE Date >= Date(subdate"{self.recent_date}", INTERVAL {short}+1 DAY)) and Date < Date(subdate("{self.recent_date}", INTERVAL 1 DAY))
+                                                        WHERE Date >= Date(subdate("{self.recent_date}", INTERVAL {short}+1 DAY)) and Date < Date(subdate("{self.recent_date}", INTERVAL 1 DAY))
                                                         GROUP BY ID) as YS on TS.ID = YS.ID
                             join
                             (SELECT ID, AVG(Close) as YL FROM stocksearch.past_market 
                                                         WHERE Date >= Date(subdate("{self.recent_date}", INTERVAL {long}+1 DAY)) and Date < Date(subdate("{self.recent_date}", INTERVAL 1 DAY))
                                                         GROUP BY ID) as YL on TS.ID = YL.ID ;"""
+        return cross_sql
+
+    def goldencross(self, short, long, df):
+        goldencross_sql = self.get_cross_sql(short, long)
         mean_df = pd.read_sql(goldencross_sql, self.conn)
         mean_df = mean_df[(mean_df['TS'] > mean_df['TL']) & (mean_df['YS'] < mean_df['YL'])]
         new_df = pd.merge(mean_df, df, left_on='ID', right_on='ID', how='inner')
@@ -188,23 +192,7 @@ class CrossFilter:
         return new_df
 
     def deadcross(self, short, long, df):
-        short, long = int(short), int(long)
-        deadcross_sql = f"""select TS.ID, TS, TL, YS, YL from 
-                            (SELECT ID, AVG(Close) as TS FROM stocksearch.past_market 
-                                                        WHERE Date >= Date(subdate(now(), INTERVAL {short} DAY))
-                                                        GROUP BY ID) as TS
-                            join
-                            (SELECT ID, AVG(Close) as TL FROM stocksearch.past_market 
-                                                        WHERE Date >= Date(subdate(now(), INTERVAL {long} DAY))
-                                                        GROUP BY ID) as TL on TS.ID = TL.ID
-                            join
-                            (SELECT ID, AVG(Close) as YS FROM stocksearch.past_market 
-                                                        WHERE Date >= Date(subdate(now(), INTERVAL {short}+1 DAY)) and Date < Date(subdate(now(), INTERVAL 1 DAY))
-                                                        GROUP BY ID) as YS on TS.ID = YS.ID
-                            join
-                            (SELECT ID, AVG(Close) as YL FROM stocksearch.past_market 
-                                                        WHERE Date >= Date(subdate(now(), INTERVAL {long}+1 DAY)) and Date < Date(subdate(now(), INTERVAL 1 DAY))
-                                                        GROUP BY ID) as YL on TS.ID = YL.ID ;"""
+        deadcross_sql = self.get_cross_sql(short, long)
         mean_df = pd.read_sql(deadcross_sql, self.conn)
         mean_df = mean_df[(mean_df['TS'] < mean_df['TL']) & (mean_df['YS'] > mean_df['YL'])]
         new_df = pd.merge(mean_df, df, left_on='ID', right_on='ID', how='inner')

@@ -4,6 +4,8 @@ import pymysql
 import pandas as pd
 import time
 
+start_num = 0
+
 # today
 now = datetime.datetime.now()
 today = now.strftime("%Y%m%d")
@@ -66,7 +68,7 @@ code_li = daily_df['ID']
 
 print('조회제한 방지 위해 10초 휴식중...')
 time.sleep(10)
-for i in range(len(code_li)):
+for i in range(start_num, len(code_li)):
     code = code_li[i]
     print(f"{code} ({i}/{len(code_li)})")
     time.sleep(0.6)

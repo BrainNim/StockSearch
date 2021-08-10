@@ -66,7 +66,7 @@ code_li = daily_df['ID']
 
 print('조회제한 방지 위해 10초 휴식중...')
 time.sleep(10)
-for i in range(2000, len(code_li)):
+for i in range(len(code_li)):
     code = code_li[i]
     print(f"{code} ({i}/{len(code_li)})")
     time.sleep(0.6)
@@ -108,9 +108,9 @@ for i in range(2000, len(code_li)):
     curs.execute(update_sql_2)
     conn.commit()
 
-    if i % 1000 == 999:  # 1000개마다 60초 휴식
-        print('조회제한 방지 위해 60초 휴식 후 재로그인')
-        kiwoom.CommConnect(block=True)
-        time.sleep(60)
+    # if i % 1000 == 999:  # 1000개마다 60초 휴식
+    #     print('조회제한 방지 위해 60초 휴식 후 재로그인')
+    #     kiwoom.CommConnect(block=True)
+    #     time.sleep(60)
 
 conn.close()

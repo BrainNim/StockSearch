@@ -3,6 +3,8 @@ import datetime
 import pandas as pd
 from pykiwoom.kiwoom import *
 
+start_num = 0
+
 # 오늘날짜
 now = datetime.datetime.now()
 today = now.strftime("%Y%m%d")
@@ -20,14 +22,15 @@ conn = pymysql.connect(host="localhost",
 curs = conn.cursor()
 
 # past_market 테이블 리셋
+# print("past_market 테이블 리셋중...")
 # curs.execute("DELETE FROM stocksearch.past_market")
 # conn.commit()
-# print("past_market 테이블 리셋")
+# print("리셋완료")
 
 code_df = pd.read_sql("select ID from stocksearch.daily_market", conn)
 
 
-for idx in range(2000, len(code_df)):
+for idx in range(start_num, len(code_df)):
     code = code_df['ID'].iloc[idx]
     time.sleep(0.6)
     print(idx, code)

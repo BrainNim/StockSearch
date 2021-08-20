@@ -160,26 +160,29 @@ class ROEFilter:
 class CrossFilter:
     def __init__(self, conn):
         self.conn = conn
-        schedule = pd.read_sql(f"""SELECT Date FROM stocksearch.past_market GROUP BY Date ORDER BY Date DESC;""", conn)
-        self.recent_date = schedule.iloc[0].values[0]  # 최근 시장오픈
+        self.schedule = pd.read_sql(f"""SELECT Date FROM stocksearch.past_market GROUP BY Date ORDER BY Date DESC;""", self.conn)
+        self.recent_date = self.schedule.iloc[0].values[0]  # 최근 시장오픈
 
     def get_cross_sql(self, short, long):
         short, long = int(short), int(long)
+        short_ago = self.schedule.iloc[short].values[0]
+        long_ago = self.schedule.iloc[long].values[0]
+        # TS: TodayShort, TL: TodayLong, YS: YesterdayShort, YL:YesterdayLong
         cross_sql = f"""select TS.ID, TS, TL, YS, YL from 
                             (SELECT ID, AVG(Close) as TS FROM stocksearch.past_market 
-                                                        WHERE Date >= Date(subdate("{self.recent_date}", INTERVAL {short} DAY))
+                                                        WHERE Date > "{short_ago}"
                                                         GROUP BY ID) as TS
                             join
                             (SELECT ID, AVG(Close) as TL FROM stocksearch.past_market 
-                                                        WHERE Date >= Date(subdate("{self.recent_date}", INTERVAL {long} DAY))
+                                                        WHERE Date > "{long_ago}"
                                                         GROUP BY ID) as TL on TS.ID = TL.ID
                             join
                             (SELECT ID, AVG(Close) as YS FROM stocksearch.past_market 
-                                                        WHERE Date >= Date(subdate("{self.recent_date}", INTERVAL {short}+1 DAY)) and Date < Date(subdate("{self.recent_date}", INTERVAL 1 DAY))
+                                                        WHERE Date >= "{short_ago}" and Date < "{self.recent_date}"
                                                         GROUP BY ID) as YS on TS.ID = YS.ID
                             join
                             (SELECT ID, AVG(Close) as YL FROM stocksearch.past_market 
-                                                        WHERE Date >= Date(subdate("{self.recent_date}", INTERVAL {long}+1 DAY)) and Date < Date(subdate("{self.recent_date}", INTERVAL 1 DAY))
+                                                        WHERE Date >= "{long_ago}" and Date < Date "{self.recent_date}"
                                                         GROUP BY ID) as YL on TS.ID = YL.ID ;"""
         return cross_sql
 

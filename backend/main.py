@@ -13,8 +13,9 @@ conn = pymysql.connect(host="localhost",
 app = Flask(__name__)
 
 # http://127.0.0.1:5000/?MarketFilter.market=KOSPI
+# http://127.0.0.1:5000/?PriceFilter.dist_max=60,in
 # http://127.0.0.1:5000/?MarketFilter.market=KOSPI&PriceFilter.compare_max=0.7
-# http://127.0.0.1:5000/?MarketFilter.market=KOSPI&PriceFilter.compare_max=0.7&MarketFilter.market=KOSDAQ
+# http://127.0.0.1:5000/?MarketFilter.market=KOSPI&MarketFilter.market=KOSDAQ
 # http://127.0.0.1:5000/?MarketFilter.market=KOSPI&PriceFilter.updown=1000,10000&PriceFilter.compare_max=0.7
 @app.route('/')
 def filter():
@@ -29,9 +30,9 @@ def filter():
     for param in parameters:
         func = param.split('=')[0].split('.')[0]
         method = param.split('=')[0].split('.')[-1]
-        values = param.split('=')[-1]
+        values = param.split('=')[-1].split(',')
         filter_func = getattr(globals()[func](conn), method)
-        df = filter_func(values, df)
+        df = filter_func(*values, df)
 
     return str(df.ID.to_list())
 

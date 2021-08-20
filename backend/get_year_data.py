@@ -32,7 +32,7 @@ code_df = pd.read_sql("select ID from stocksearch.daily_market", conn)
 
 for idx in range(start_num, len(code_df)):
     code = code_df['ID'].iloc[idx]
-    time.sleep(0.6)
+    time.sleep(0.4)
     print(idx, code)
     # 약 2년치 요청
     df = kiwoom.block_request("opt10081",

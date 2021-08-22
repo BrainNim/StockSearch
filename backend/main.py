@@ -1,3 +1,5 @@
+import json
+import flask
 import pymysql
 import pandas as pd
 from flask import Flask, request, jsonify
@@ -34,7 +36,14 @@ def filter():
         filter_func = getattr(globals()[func](conn), method)
         df = filter_func(*values, df)
 
-    return str(df.ID.to_list())
+    # result에 필요한 칼럼 정보
+    cols = ['Name', 'ID', 'Close', 'Volume']
+    df = df[cols]
+
+    answer = {}
+    answer['result'] = df.to_dict('records')
+
+    return json.dumps(answer, ensure_ascii=False, indent=4)
 
 if __name__ == "__main__":
     app.run()

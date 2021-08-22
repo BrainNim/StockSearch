@@ -10,7 +10,7 @@ conn = pymysql.connect(host="localhost",
                        user="root",
                        password="0000",
                        db="stocksearch")
-
+curs = conn.cursor()
 # Flask run
 app = Flask(__name__)
 
@@ -40,8 +40,27 @@ def filter():
     cols = ['Name', 'ID', 'Close', 'Volume']
     df = df[cols]
 
+    # one_year_before에 필요한 칼럼 정보
+    ids = df.ID.to_list()
+    one_year_ago_date_sql = "SELECT Date FROM stocksearch.past_market WHERE Date <= date_add(now(), interval -1 year) GROUP BY Date ORDER BY Date DESC LIMIT 1;"  # 1년 전 날짜
+    curs.execute(one_year_ago_date_sql)
+    one_year_ago_date = curs.fetchone()[0]
+    one_year_ago_date = one_year_ago_date.strftime("%Y-%m-%d")
+
+    where_str = ''
+    for id in ids:
+        where_str += f'ID = "{id}" or '
+    where_str = where_str[:-3]  # 마지막 'or ' 제거
+    one_year_ago_sql = f"""SELECT ID, Close FROM stocksearch.past_market 
+                        WHERE Date = "{one_year_ago_date}"
+                        and ({where_str});"""
+    one_year_ago_df = pd.read_sql(one_year_ago_sql, conn)
+
+
     answer = {}
     answer['result'] = df.to_dict('records')
+    answer['one_year_before_date'] = one_year_ago_date
+    answer['one_year_before'] = one_year_ago_df.to_dict('records')
 
     return json.dumps(answer, ensure_ascii=False, indent=4)
 

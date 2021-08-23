@@ -96,7 +96,7 @@ for i in range(start_num, len(code_li)):
                     PBR = {today_df['PBR']}, EV = {today_df['EV']}, BPS = {today_df['BPS']},
                     Revenue = {today_df['매출액']}, Operating_Income = {today_df['영업이익']}, Net_Income = {today_df['당기순이익']},
                     Open = {abs(int(today_df['시가']))}, High = {abs(int(today_df['고가']))}, Low = {abs(int(today_df['저가']))},
-                    Close = {abs(int(today_df['현재가']))}, Volume = {abs(int(today_df['거래량']))},
+                    Close = {abs(int(today_df['현재가']))}, Volume = {abs(int(today_df['거래량']))}, DaytoDay = {today_df['전일대비']},
                     Highest_Price = {abs(int(today_df['250최고']))}, Highest_Date = {today_df['250최고가일']}
                     WHERE ID = '{code}'; """
     curs.execute(update_sql_1)

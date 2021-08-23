@@ -37,7 +37,7 @@ def filter():
         df = filter_func(*values, df)
 
     # result에 필요한 칼럼 정보
-    cols = ['Name', 'ID', 'Close', 'Volume']
+    cols = ['Name', 'ID', 'Close', 'Volume', 'DaytoDay']
     df = df[cols]
 
     # one_year_before에 필요한 칼럼 정보

@@ -55,7 +55,8 @@ def filter():
                         WHERE Date = "{one_year_ago_date}"
                         and ({where_str});"""
     one_year_ago_df = pd.read_sql(one_year_ago_sql, conn)
-
+    new_df = pd.merge(one_year_ago_df, df, left_on='ID', right_on='ID', how='inner')
+    one_year_ago_df['rate'] = new_df.apply(lambda x: (x.Close_y-x.Close_x)/x.Close_x*100, axis=1)
 
     answer = {}
     answer['result'] = df.to_dict('records')

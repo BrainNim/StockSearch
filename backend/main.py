@@ -1,34 +1,37 @@
 import json
-import flask
 import pymysql
 import pandas as pd
-from flask import Flask, request, jsonify
+from flask import Flask, request
 from search_filter import *
 
-# connect mysql
-conn = pymysql.connect(host="localhost",
-                       user="root",
-                       password="0000",
-                       db="stocksearch")
-curs = conn.cursor()
-# Flask run
+# Flask
 app = Flask(__name__)
 
 # http://127.0.0.1:5000/?MarketFilter.market=KOSPI
 # http://127.0.0.1:5000/?PriceFilter.dist_max=60,in
 # http://127.0.0.1:5000/?MarketFilter.market=KOSPI&PriceFilter.compare_max=0.7
-# http://127.0.0.1:5000/?MarketFilter.market=KOSPI&MarketFilter.market=KOSDAQ
 # http://127.0.0.1:5000/?MarketFilter.market=KOSPI&PriceFilter.updown=1000,10000&PriceFilter.compare_max=0.7
+# http://127.0.0.1:5000/?MarketFilter.market=KOSPI&PriceFilter.updown=1000,10000&PriceFilter.compare_max=0.7&CrossFilter.goldencross=5,20
+
 @app.route('/')
 def filter():
+    # connect mysql
+    conn = pymysql.connect(host="localhost",
+                           user="root",
+                           password="0000",
+                           db="stocksearch")
+    curs = conn.cursor()
+
     df = pd.read_sql("select * from stocksearch.daily_market", conn)
 
+    # read query & parameters
     query = request.query_string.decode('utf-8')
     parameters = query.split('&')
 
     if len(parameters) == 0:
         return df.ID.to_string()
 
+    # data filtering
     for param in parameters:
         func = param.split('=')[0].split('.')[0]
         method = param.split('=')[0].split('.')[-1]
@@ -66,4 +69,4 @@ def filter():
     return json.dumps(answer, ensure_ascii=False, indent=4)
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True, threaded=True)

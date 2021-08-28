@@ -2,7 +2,10 @@
 기술분석과 투자를 위한 주식종목검색 어플리케이션 개발
 
 
-## 함수 및 쿼리
+## 종목검색함수 및 쿼리
+예시)  
+``` localhost:5000/?MarketFilter.market=KOSPI ```  
+``` localhost:5000/?PriceFilter.updown=1000,10000&PriceFilter.compare_max=0.7&CrossFilter.goldencross=5,20 ```
 
 ### MarketFilter
 | 세부필터      |입력값수| 입력값상세        | 설명                                                       | 쿼리예시                            |
@@ -41,3 +44,16 @@
 |--------------|-------|----------------------------|------------------------------------------------------------|------------------------------------|
 | goldencross  | 2     | short,long  </br>(int,int) | ('short'일평균선과 'long'일평균선이 골든크로스)에 부합하는 종목 | CrossFilter.goldencross=5,20       |
 | deadcross    | 2     | short,long  </br>(int,int) | ('short'일평균선과 'long'일평균선이 데드크로스)에 부합하는 종목 | CrossFilter.daedcross=5,20         |
+  
+  
+  
+## 주식용어사전
+예시)  
+``` localhost:5000/dictionary/ ```  
+``` localhost:5000/dictionary/2 ```
+
+#### 사전 전체목록 조회
+``` /dictionary/ ```
+
+#### 특정 항목(용어) 조회
+``` /dictionary/<int:Dic_SN> ```

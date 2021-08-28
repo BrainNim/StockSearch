@@ -7,13 +7,13 @@ from search_filter import *
 # Flask
 app = Flask(__name__)
 
+
+###### SEARCH FILTER #####
 # http://127.0.0.1:5000/?MarketFilter.market=KOSPI
 # http://127.0.0.1:5000/?PriceFilter.dist_max=60,in
 # http://127.0.0.1:5000/?MarketFilter.market=KOSPI&PriceFilter.compare_max=0.7
 # http://127.0.0.1:5000/?MarketFilter.market=KOSPI&PriceFilter.updown=1000,10000&PriceFilter.compare_max=0.7
 # http://127.0.0.1:5000/?MarketFilter.market=KOSPI&PriceFilter.updown=1000,10000&PriceFilter.compare_max=0.7&CrossFilter.goldencross=5,20
-
-###### SEARCH FILTER #####
 @app.route('/', methods=['GET',])
 def filter():
     # connect mysql
@@ -71,6 +71,8 @@ def filter():
 
 
 ###### DICTIONARY #####
+# http://127.0.0.1:5000/dictionary
+# http://127.0.0.1:5000/dictionary/2
 @app.route('/dictionary/', methods=['GET',])
 @app.route('/dictionary/<int:Dic_SN>', methods=['GET',])
 def dic(Dic_SN=None):

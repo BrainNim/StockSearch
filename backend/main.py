@@ -79,20 +79,20 @@ def dic(Dic_SN=None):
                            user="root",
                            password="0000",
                            db="stocksearch")
+    curs = conn.cursor()
 
     if Dic_SN == None:
         total_df = pd.read_sql("SELECT Dic_SN, Title FROM stocksearch.dictionary;", conn)
         answer = total_df.to_dict('records')
-        return json.dumps(answer, ensure_ascii=False, indent=4)
 
     else:
-        query = request.values
-        return query
-    # if len(parameters) == 0:
-    #     return df.ID.to_string()
+        curs.execute(f"SELECT * FROM stocksearch.dictionary WHERE Dic_SN = {Dic_SN};")
+        dic_data = curs.fetchone()
+        answer = dict(zip(['Dic_SN', 'Title', 'Description', 'Condition'], dic_data))
+        print(answer)
 
+    return json.dumps(answer, ensure_ascii=False, indent=4)
 
-    # return 'a'
 
 if __name__ == "__main__":
     app.run(debug=True, threaded=True)

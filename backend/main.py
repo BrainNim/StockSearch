@@ -13,7 +13,8 @@ app = Flask(__name__)
 # http://127.0.0.1:5000/?MarketFilter.market=KOSPI&PriceFilter.updown=1000,10000&PriceFilter.compare_max=0.7
 # http://127.0.0.1:5000/?MarketFilter.market=KOSPI&PriceFilter.updown=1000,10000&PriceFilter.compare_max=0.7&CrossFilter.goldencross=5,20
 
-@app.route('/')
+###### SEARCH FILTER #####
+@app.route('/', methods=['GET',])
 def filter():
     # connect mysql
     conn = pymysql.connect(host="localhost",
@@ -67,6 +68,31 @@ def filter():
     answer['one_year_before'] = one_year_ago_df.to_dict('records')
 
     return json.dumps(answer, ensure_ascii=False, indent=4)
+
+
+###### DICTIONARY #####
+@app.route('/dictionary/', methods=['GET',])
+@app.route('/dictionary/<int:Dic_SN>', methods=['GET',])
+def dic(Dic_SN=None):
+    # connect mysql
+    conn = pymysql.connect(host="localhost",
+                           user="root",
+                           password="0000",
+                           db="stocksearch")
+
+    if Dic_SN == None:
+        total_df = pd.read_sql("SELECT Dic_SN, Title FROM stocksearch.dictionary;", conn)
+        answer = total_df.to_dict('records')
+        return json.dumps(answer, ensure_ascii=False, indent=4)
+
+    else:
+        query = request.values
+        return query
+    # if len(parameters) == 0:
+    #     return df.ID.to_string()
+
+
+    # return 'a'
 
 if __name__ == "__main__":
     app.run(debug=True, threaded=True)

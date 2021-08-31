@@ -45,14 +45,17 @@ for idx in range(start_num, len(code_df)):
     df = df[['일자', '시가', '고가', '저가', '현재가', '거래량']]
     col = ['Date', 'Open', 'High', 'Low', 'Close', 'Volume']
     df.columns = col
-
-    for i in range(len(df)):
-        sql = f"""INSERT INTO stocksearch.past_market
-                (ID, Date, Open, High, Low, Close, Volume) Values 
-                ('{code}', {df['Date'].iloc[i]}, {df['Open'].iloc[i]}, {df['High'].iloc[i]}, 
-                {df['Low'].iloc[i]}, {df['Close'].iloc[i]}, {df['Volume'].iloc[i]}) ; """
-        curs.execute(sql)
-    conn.commit()
+    
+    try:
+        for i in range(len(df)):
+            sql = f"""INSERT INTO stocksearch.past_market
+                    (ID, Date, Open, High, Low, Close, Volume) Values 
+                    ('{code}', {df['Date'].iloc[i]}, {df['Open'].iloc[i]}, {df['High'].iloc[i]}, 
+                    {df['Low'].iloc[i]}, {df['Close'].iloc[i]}, {df['Volume'].iloc[i]}) ; """
+            curs.execute(sql)
+        conn.commit()
+    except:
+        print(idx, code, '에러')
 
 conn.close()
 

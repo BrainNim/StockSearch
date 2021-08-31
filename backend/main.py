@@ -75,11 +75,10 @@ def filter():
 @app.route('/dictionary/', methods=['GET',])
 @app.route('/dictionary/<int:Dic_SN>', methods=['GET',])
 def dic(Dic_SN=None):
-    # connect mysql
-    conn = pymysql.connect(host="localhost",
-                           user="root",
-                           password="0000",
-                           db="stocksearch")
+    # mysql connecting info & connect
+    key_df = pd.read_csv('aws_db_key.txt', header=None)
+    host, user, password, db = key_df[0][0], key_df[0][1], key_df[0][2], key_df[0][3]
+    conn = pymysql.connect(host=host, user=user, password=password, db=db)
     curs = conn.cursor()
 
     if Dic_SN == None:

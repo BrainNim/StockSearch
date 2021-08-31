@@ -16,11 +16,10 @@ app = Flask(__name__)
 # http://127.0.0.1:5000/?MarketFilter.market=KOSPI&PriceFilter.updown=1000,10000&PriceFilter.compare_max=0.7&CrossFilter.goldencross=5,20
 @app.route('/', methods=['GET',])
 def filter():
-    # connect mysql
-    conn = pymysql.connect(host="localhost",
-                           user="root",
-                           password="0000",
-                           db="stocksearch")
+    # mysql connecting info & connect
+    key_df = pd.read_csv('aws_db_key.txt', header=None)
+    host, user, password, db = key_df[0][0], key_df[0][1], key_df[0][2], key_df[0][3]
+    conn = pymysql.connect(host=host, user=user, password=password, db=db)
     curs = conn.cursor()
 
     df = pd.read_sql("select * from stocksearch.daily_market", conn)

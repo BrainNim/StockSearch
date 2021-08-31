@@ -14,12 +14,10 @@ kiwoom = Kiwoom()
 kiwoom.CommConnect(block=True)
 print('로그인 성공')
 
-# connect mysql
-conn = pymysql.connect(host="localhost",
-                       user="root",
-                       password="0000",
-                       db="stocksearch")
-curs = conn.cursor()
+# mysql connecting info & connect
+key_df = pd.read_csv('aws_db_key.txt', header=None)
+host, user, password, db = key_df[0][0], key_df[0][1], key_df[0][2], key_df[0][3]
+conn = pymysql.connect(host=host, user=user, password=password, db=db)
 
 # past_market 테이블 리셋
 # print("past_market 테이블 리셋중...")
@@ -45,14 +43,17 @@ for idx in range(start_num, len(code_df)):
     df = df[['일자', '시가', '고가', '저가', '현재가', '거래량']]
     col = ['Date', 'Open', 'High', 'Low', 'Close', 'Volume']
     df.columns = col
-
-    for i in range(len(df)):
-        sql = f"""INSERT INTO stocksearch.past_market
-                (ID, Date, Open, High, Low, Close, Volume) Values 
-                ('{code}', {df['Date'].iloc[i]}, {df['Open'].iloc[i]}, {df['High'].iloc[i]}, 
-                {df['Low'].iloc[i]}, {df['Close'].iloc[i]}, {df['Volume'].iloc[i]}) ; """
-        curs.execute(sql)
-    conn.commit()
+    
+    try:
+        for i in range(len(df)):
+            sql = f"""INSERT INTO stocksearch.past_market
+                    (ID, Date, Open, High, Low, Close, Volume) Values 
+                    ('{code}', {df['Date'].iloc[i]}, {df['Open'].iloc[i]}, {df['High'].iloc[i]}, 
+                    {df['Low'].iloc[i]}, {df['Close'].iloc[i]}, {df['Volume'].iloc[i]}) ; """
+            curs.execute(sql)
+        conn.commit()
+    except:
+        print(idx, code, '에러')
 
 conn.close()
 

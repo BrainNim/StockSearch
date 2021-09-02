@@ -14,7 +14,7 @@ app = Flask(__name__)
 # http://127.0.0.1:5000/?MarketFilter.market=KOSPI&PriceFilter.compare_max=0.7
 # http://127.0.0.1:5000/?MarketFilter.market=KOSPI&PriceFilter.updown=1000,10000&PriceFilter.compare_max=0.7
 # http://127.0.0.1:5000/?MarketFilter.market=KOSPI&PriceFilter.updown=1000,10000&PriceFilter.compare_max=0.7&CrossFilter.goldencross=5,20
-@app.route('/', methods=['GET',])
+@app.route('/', methods=['GET', ])
 def filter():
     # mysql connecting info & connect
     key_df = pd.read_csv('aws_db_key.txt', header=None)
@@ -59,7 +59,7 @@ def filter():
                         and ({where_str});"""
     one_year_ago_df = pd.read_sql(one_year_ago_sql, conn)
     new_df = pd.merge(one_year_ago_df, df, left_on='ID', right_on='ID', how='inner')
-    one_year_ago_df['rate'] = new_df.apply(lambda x: (x.Close_y-x.Close_x)/x.Close_x*100, axis=1)
+    one_year_ago_df['rate'] = new_df.apply(lambda x: (x.Close_y - x.Close_x) / x.Close_x * 100, axis=1)
 
     answer = {}
     answer['result'] = df.to_dict('records')
@@ -72,8 +72,8 @@ def filter():
 ###### DICTIONARY #####
 # http://127.0.0.1:5000/dictionary
 # http://127.0.0.1:5000/dictionary/2
-@app.route('/dictionary/', methods=['GET',])
-@app.route('/dictionary/<int:Dic_SN>', methods=['GET',])
+@app.route('/dictionary/', methods=['GET', ])
+@app.route('/dictionary/<int:Dic_SN>', methods=['GET', ])
 def dic(Dic_SN=None):
     # mysql connecting info & connect
     key_df = pd.read_csv('aws_db_key.txt', header=None)

@@ -105,6 +105,17 @@ def save_request_log(request, curs, conn):
     curs.execute(sql)
     conn.commit()
 
+
+# 전체쿼리문 -> 필터명 전처리 함수
+def proc_query(query):
+    query_li = query.split('&')
+    proc_str = ''
+    for q in query_li:
+        f = q.split('=')[0]
+        proc_str += f+','
+    return proc_str
+
+
 # http://127.0.0.1:5000/board
 @app.route('/board/', methods=['GET', ])
 def board():
@@ -116,10 +127,20 @@ def board():
 
     sql = "SELECT Query FROM stocksearch.request_history;"
     board_df = pd.read_sql(sql, conn)
+    # 사용한 필터 수가 2개 이상인 경우에만 살림
     board_df['filter_count'] = board_df.Query.apply(lambda x: len(x.split('&')))
-    q_li = list(board_df.Query)
-    print(Counter(q_li))
-    print(board_df)
+    board_df = board_df[board_df['filter_count'] >= 2]
+
+    # 값을 제거하고 이용한 필터만 뽑아내기
+    board_df['filter_ori'] = board_df.Query.apply(lambda x: proc_query(x))
+    # 각 필터조합 당 수 세기
+    query_count = Counter(list(board_df.filter_ori))
+
+    board_df['duplicated_count'] = 0
+
+    # for filter_ori in query_count:
+    #     board_df['duplicated_count']
+    #     print(filter_ori, query_count[filter_ori])
 
     return board_df.to_json(orient='index')
 

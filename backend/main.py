@@ -3,6 +3,7 @@ import pymysql
 import pandas as pd
 from flask import Flask, request
 from search_filter import *
+from collections import Counter
 
 # Flask
 app = Flask(__name__)
@@ -66,6 +67,9 @@ def filter():
     answer['one_year_before_date'] = one_year_ago_date
     answer['one_year_before'] = one_year_ago_df.to_dict('records')
 
+    # 요청 log를 DB에 저장
+    save_request_log(query, curs, conn)
+
     return json.dumps(answer, ensure_ascii=False, indent=4)
 
 
@@ -92,6 +96,33 @@ def dic(Dic_SN=None):
         print(answer)
 
     return json.dumps(answer, ensure_ascii=False, indent=4)
+
+
+###### Board #####
+# 유저가 searchfilter를 사용할 때 마다 요청쿼리를 저장
+def save_request_log(request, curs, conn):
+    sql = f"INSERT INTO stocksearch.request_history (query) VALUES ('{request}')"
+    curs.execute(sql)
+    conn.commit()
+
+# http://127.0.0.1:5000/board
+@app.route('/board/', methods=['GET', ])
+def board():
+    # mysql connecting info & connect
+    key_df = pd.read_csv('aws_db_key.txt', header=None)
+    host, user, password, db = key_df[0][0], key_df[0][1], key_df[0][2], key_df[0][3]
+    conn = pymysql.connect(host=host, user=user, password=password, db=db)
+    curs = conn.cursor()
+
+    sql = "SELECT Query FROM stocksearch.request_history;"
+    board_df = pd.read_sql(sql, conn)
+    board_df['filter_count'] = board_df.Query.apply(lambda x: len(x.split('&')))
+    q_li = list(board_df.Query)
+    print(Counter(q_li))
+    print(board_df)
+
+    return board_df.to_json(orient='index')
+
 
 
 if __name__ == "__main__":

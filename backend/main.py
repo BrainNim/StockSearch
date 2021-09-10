@@ -4,7 +4,7 @@ import pandas as pd
 from flask import Flask, request
 from search_filter import *
 from collections import Counter
-
+pd.set_option('display.max_columns', None)
 # Flask
 app = Flask(__name__)
 
@@ -135,15 +135,11 @@ def board():
     board_df['filter_ori'] = board_df.Query.apply(lambda x: proc_query(x))
     # 각 필터조합 당 수 세기
     query_count = Counter(list(board_df.filter_ori))
+    board_df['duplicated_count'] = board_df.apply(lambda x: query_count[x['filter_ori']], axis=1)
+    # 정렬, 칼럼 drop
+    board_df = board_df.sort_values(by='duplicated_count', ascending=False).drop_duplicates(['filter_ori'])
 
-    board_df['duplicated_count'] = 0
-
-    # for filter_ori in query_count:
-    #     board_df['duplicated_count']
-    #     print(filter_ori, query_count[filter_ori])
-
-    return board_df.to_json(orient='index')
-
+    return board_df[['Query']].to_json(orient='index')
 
 
 if __name__ == "__main__":

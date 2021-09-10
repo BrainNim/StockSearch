@@ -3,7 +3,8 @@ import pymysql
 import pandas as pd
 from flask import Flask, request
 from search_filter import *
-
+from collections import Counter
+pd.set_option('display.max_columns', None)
 # Flask
 app = Flask(__name__)
 
@@ -66,6 +67,9 @@ def filter():
     answer['one_year_before_date'] = one_year_ago_date
     answer['one_year_before'] = one_year_ago_df.to_dict('records')
 
+    # 요청 log를 DB에 저장
+    save_request_log(query, curs, conn)
+
     return json.dumps(answer, ensure_ascii=False, indent=4)
 
 
@@ -92,6 +96,50 @@ def dic(Dic_SN=None):
         print(answer)
 
     return json.dumps(answer, ensure_ascii=False, indent=4)
+
+
+###### Board #####
+# 유저가 searchfilter를 사용할 때 마다 요청쿼리를 저장
+def save_request_log(request, curs, conn):
+    sql = f"INSERT INTO stocksearch.request_history (query) VALUES ('{request}')"
+    curs.execute(sql)
+    conn.commit()
+
+
+# 전체쿼리문 -> 필터명 전처리 함수
+def proc_query(query):
+    query_li = query.split('&')
+    proc_str = ''
+    for q in query_li:
+        f = q.split('=')[0]
+        proc_str += f+','
+    return proc_str
+
+
+# http://127.0.0.1:5000/board
+@app.route('/board/', methods=['GET', ])
+def board():
+    # mysql connecting info & connect
+    key_df = pd.read_csv('aws_db_key.txt', header=None)
+    host, user, password, db = key_df[0][0], key_df[0][1], key_df[0][2], key_df[0][3]
+    conn = pymysql.connect(host=host, user=user, password=password, db=db)
+    curs = conn.cursor()
+
+    sql = "SELECT Query FROM stocksearch.request_history;"
+    board_df = pd.read_sql(sql, conn)
+    # 사용한 필터 수가 2개 이상인 경우에만 살림
+    board_df['filter_count'] = board_df.Query.apply(lambda x: len(x.split('&')))
+    board_df = board_df[board_df['filter_count'] >= 2]
+
+    # 값을 제거하고 이용한 필터만 뽑아내기
+    board_df['filter_ori'] = board_df.Query.apply(lambda x: proc_query(x))
+    # 각 필터조합 당 수 세기
+    query_count = Counter(list(board_df.filter_ori))
+    board_df['duplicated_count'] = board_df.apply(lambda x: query_count[x['filter_ori']], axis=1)
+    # 정렬, 칼럼 drop
+    board_df = board_df.sort_values(by='duplicated_count', ascending=False).drop_duplicates(['filter_ori'])
+
+    return board_df[['Query']].to_json(orient='index')
 
 
 if __name__ == "__main__":

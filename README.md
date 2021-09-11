@@ -116,11 +116,32 @@
 ``` localhost:5000/dictionary/ ```  
 ``` localhost:5000/dictionary/2 ```
 
-#### 사전 전체목록 조회
+### 사전 전체목록 조회
 ``` /dictionary/ ```
 
-#### 특정 항목(용어) 조회
+#### 출력결과(JSON)
+```json
+[{
+	"Dic_SN": 1,
+	"Title": "골든크로스"
+}, {
+	"Dic_SN": 2,
+	"Title": "데드크로스"
+}]
+```
+
+### 특정 항목(용어) 조회
 ``` /dictionary/<int:Dic_SN> ```
+
+#### 출력결과(JSON)
+```json
+{
+	"Dic_SN": 1,
+	"Title": "골든크로스",
+	"Description": "블라블라블라",
+	"Condition": "CrossFilter.goldencross=5,20"
+}
+```
 
 
 

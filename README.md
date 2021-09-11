@@ -45,7 +45,71 @@
 | goldencross  | 2     | short,long  </br>(int,int) | ('short'일평균선과 'long'일평균선이 골든크로스)에 부합하는 종목 | CrossFilter.goldencross=5,20       |
 | deadcross    | 2     | short,long  </br>(int,int) | ('short'일평균선과 'long'일평균선이 데드크로스)에 부합하는 종목 | CrossFilter.daedcross=5,20         |
   
+
+### 출력 결과(JSON)
+```
+{
+	"result": [{
+		"Name": "종목명"<string>,
+		"ID": "종목코드"<string>,
+		"Close": 종가(현재가)<number>,
+		"Volume": 거래량<number>,
+		"DaytoDay": 이전 거래일 대비 가격증감(정수)<number>
+	}],
+	"one_year_before_date": "1년 전 날자"<string>,
+	"one_year_before": [{
+		"ID": "종목코드"<string>,
+		"Close": 1 년전 종가<number>,
+		"rate": 1 년전 대비 수익률(%)<number>
+	}]
+}
+```
+
+<details>
+<summary>출력예시 (접기/펼치기)</summary>
+<div markdown="1">
   
+```json
+{
+	"result": [{
+		"Name": "써니전자",
+		"ID": "004770",
+		"Close": 3245,
+		"Volume": 210758,
+		"DaytoDay": 50.0
+	}, {
+		"Name": "아남전자",
+		"ID": "008700",
+		"Close": 2615,
+		"Volume": 538375,
+		"DaytoDay": 0.0
+	}, {
+		"Name": "에쓰씨엔지니어링",
+		"ID": "023960",
+		"Close": 4920,
+		"Volume": 228605,
+		"DaytoDay": -75.0
+	}],
+	"one_year_before_date": "2020-09-11",
+	"one_year_before": [{
+		"ID": "004770",
+		"Close": 4110,
+		"rate": -21.046228710462287
+	}, {
+		"ID": "008700",
+		"Close": 1905,
+		"rate": 37.270341207349084
+	}, {
+		"ID": "023960",
+		"Close": 1300,
+		"rate": 278.46153846153845
+	}]
+}
+```
+</div>
+</details>
+
+
   
 ## 주식용어사전
 예시)  

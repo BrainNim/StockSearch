@@ -5,7 +5,6 @@ import pandas as pd
 import time
 
 def update(start_num = 0):
-    start_num = 0
 
     # today
     now = datetime.datetime.now()
@@ -68,7 +67,7 @@ def update(start_num = 0):
 
     print('조회제한 방지 위해 10초 휴식중...')
     time.sleep(10)
-    for i in range(start_num, len(code_li)):
+    for i in range(start_num, min(start_num+1000, len(total_code))):
         code = code_li[i]
         print(f"{code} ({i}/{len(code_li)})")
         time.sleep(0.6)
@@ -114,5 +113,7 @@ def update(start_num = 0):
         #     print('조회제한 방지 위해 60초 휴식 후 재로그인')
         #     kiwoom.CommConnect(block=True)
         #     time.sleep(60)
+
+    kiwoom.disconnect()
 
     conn.close()

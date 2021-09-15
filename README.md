@@ -1,7 +1,95 @@
 # StockSearch (가제: 나도주주, 주린이를 위한 기술분석서치 가이드)
 기술분석과 투자를 위한 주식종목검색 어플리케이션 개발
 
+## 필터리스트 조회
+예시) ```http://127.0.0.1:5000/filter_li```
 
+### 출력결과(JSON)
+```
+{
+   "filter":[
+      {
+         "name":"필터이름",
+         "subfilter":[
+            {
+               "name":"서브필터이름",
+               "input":{
+                  "type":"입력값구분",
+                  "data_format":"입력값포맷형식"
+               }
+            }
+         ]
+      }
+   ]
+}
+```
+
+<details>
+<summary>출력예시 (접기/펼치기)</summary>
+<div markdown="1">
+  
+```json
+{
+   "filter":[
+      {
+         "name":"MarketFilter",
+         "subfilter":[
+            {
+               "name":"market",
+               "input":{
+                  "type":"market",
+                  "data_format":"KOSPI,KOSDAQ"
+               }
+            },
+            {
+               "name":"category",
+               "input":{
+                  "type":"category",
+                  "data_format":null
+               }
+            }
+         ]
+      },
+      {
+         "name":"PriceFilter",
+         "subfilter":[
+            {
+               "name":"updown",
+               "input":{
+                  "type":"min,max",
+                  "data_format":"int,int"
+               }
+            },
+            {
+               "name":"compare_mean",
+               "input":{
+                  "type":"day,times,updown",
+                  "data_format":"int,flt,str"
+               }
+            },
+            {
+               "name":"compare_max",
+               "input":{
+                  "type":"times",
+                  "data_format":"flt"
+               }
+            },
+            {
+               "name":"dist_max",
+               "input":{
+                  "type":"day,inout",
+                  "data_format":"int,str"
+               }
+            }
+         ]
+      }
+   ]
+}
+	
+```
+</div>
+</details>
+	
 ## 종목검색함수 및 쿼리
 예시)  
 ``` localhost:5000/?MarketFilter.market=KOSPI ```  
@@ -112,7 +200,7 @@
 
   
 ## 주식용어사전
-예시)  
+요청예시)  
 ``` localhost:5000/dictionary/ ```  
 ``` localhost:5000/dictionary/2 ```
 
@@ -146,7 +234,7 @@
 
 
 ## 게시판조회
-예시)  
+요청예시)  
 ``` localhost:5000/board/ ```  
 
 #### 검색 횟수 상위의 필터조합 조회

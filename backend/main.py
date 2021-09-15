@@ -9,6 +9,35 @@ pd.set_option('display.max_columns', None)
 app = Flask(__name__)
 
 
+###### FILTER LIST #####
+# http://127.0.0.1:5000/filter_li
+@app.route('/filter_li/', methods=['GET', ])
+def filter_li():
+    # mysql connecting info & connect
+    key_df = pd.read_csv('aws_db_key.txt', header=None)
+    host, user, password, db = key_df[0][0], key_df[0][1], key_df[0][2], key_df[0][3]
+    conn = pymysql.connect(host=host, user=user, password=password, db=db)
+    curs = conn.cursor()
+
+    df = pd.read_sql("SELECT * FROM stocksearch.filter_list;", conn)
+    filter_set = df.drop_duplicates('Filter').Filter
+
+    df['input'] = df.apply(lambda x: {'type': x['input_type'], 'data_format': x['input_format']}, axis=1)
+    df['subfilter'] = df.apply(lambda x: {'name': x['Subfilter'], 'input': x['input']}, axis=1)
+
+    result = []
+    for f in filter_set:
+        f_dict = {'name': f}
+        sub_li = []
+        for sub in df[df['Filter'] == f].subfilter:
+            sub_li.append(sub)
+        f_dict['subfilter'] = sub_li
+        result.append(f_dict)
+    result = {'filter': result}
+
+    return json.dumps(result, ensure_ascii=False, indent=4)
+
+
 ###### SEARCH FILTER #####
 # http://127.0.0.1:5000/?MarketFilter.market=KOSPI
 # http://127.0.0.1:5000/?PriceFilter.dist_max=60,in
@@ -137,7 +166,7 @@ def board():
     query_count = Counter(list(board_df.filter_ori))
     board_df['duplicated_count'] = board_df.apply(lambda x: query_count[x['filter_ori']], axis=1)
     # 정렬, 칼럼 drop
-    board_df = board_df.sort_values(by='duplicated_count', ascending=False).drop_duplicates(['filter_ori'])
+    board_df = board_df.sort_values(by='duplicated_count', ascending=False).drop_duplicates(['filter_ori']).head(5)
 
     return board_df[['Query']].to_json(orient='index')
 

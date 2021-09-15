@@ -20,9 +20,22 @@ def filter_li():
     curs = conn.cursor()
 
     df = pd.read_sql("SELECT * FROM stocksearch.filter_list;", conn)
-    print(df.to_dict())
+    filter_set = df.drop_duplicates('Filter').Filter
 
-    return "filter_li"
+    df['input'] = df.apply(lambda x: {'type': x['input_type'], 'data_format': x['input_format']}, axis=1)
+    df['subfilter'] = df.apply(lambda x: {'name': x['Subfilter'], 'input': x['input']}, axis=1)
+
+    result = []
+    for f in filter_set:
+        f_dict = {'name': f}
+        sub_li = []
+        for sub in df[df['Filter'] == f].subfilter:
+            sub_li.append(sub)
+        f_dict['subfilter'] = sub_li
+        result.append(f_dict)
+    result = {'filter': result}
+
+    return json.dumps(result, ensure_ascii=False, indent=4)
 
 
 ###### SEARCH FILTER #####

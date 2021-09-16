@@ -1,14 +1,15 @@
-import React from 'react';
-import { StyleSheet, TouchableOpacity, Text } from 'react-native';
+import React from 'react'
+import { StyleSheet, TouchableOpacity, Text } from 'react-native'
 
-export default function RoundButton({ text , onPress}) {
-
-
+export default function RoundButton ({ text, onPress }) {
   return (
-    <TouchableOpacity onPress={onPress} style={styles.button} activeOpacity={0.4} >
+    <TouchableOpacity
+      onPress={onPress}
+      style={styles.button}
+      activeOpacity={0.4}>
       <Text style={styles.text}>{text}</Text>
     </TouchableOpacity>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -18,9 +19,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: 70,
     height: 70,
-    marginBottom: 30,
     borderRadius: 35,
-    
+
     ...Platform.select({
       ios: {
         shadowColor: 'rgba(0,0,0,0.2)',
@@ -41,4 +41,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#D5EEBB',
   },
-});
+})

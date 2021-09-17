@@ -1,29 +1,23 @@
 # StockSearch (가제: 나도주주, 주린이를 위한 기술분석서치 가이드)
 기술분석과 투자를 위한 주식종목검색 어플리케이션 개발
 
-## 필터리스트 조회
+## 필터조회
+
+### 전체 필터리스트 조회
 예시) ```http://127.0.0.1:5000/filter_li```
 
-### 출력결과(JSON)
+#### 출력결과(JSON)
 ```
 {
    "filter":[
       {
-         "name":"필터이름(ENG)",
+	 "name":"필터이름(ENG)",
 	 "kor_name":"필터이름(KOR)",
          "subfilter":[
             {
+               "filter_SN":"메인-세부필터 고유번호"
                "name":"서브필터이름(ENG)",
 	       "kor_name":"서브필터이름(KOR)"
-               "input":{
-                  "type":"입력값구분",
-                  "data_format":"입력값포맷형식"
-               },
-	       "user_view":{
-	          "description":"해당필터설명",
-		  "default":"필터기본입력값(디폴트값)",
-		  "ux_category":"카테고리번호"
-	       }
             }
          ]
       }
@@ -96,7 +90,25 @@
 ```
 </div>
 </details>
-	
+
+### 서브필터 세부항목 조회
+
+#### 출력결과(JSON)
+```json
+"name":"필터이름(ENG)",
+"kor_name":"필터이름(KOR)",
+"input":{
+   "type":"입력값구분",
+   "data_format":"입력값포맷형식"
+},
+"user_view":{
+   "description":"해당필터설명",
+   "default":"필터기본입력값(디폴트값)",
+   "ux_category":"카테고리번호"
+}
+```
+
+
 ## 종목검색함수 및 쿼리
 예시)  
 ``` localhost:5000/?MarketFilter.market=KOSPI ```  

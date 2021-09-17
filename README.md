@@ -9,14 +9,21 @@
 {
    "filter":[
       {
-         "name":"필터이름",
+         "name":"필터이름(ENG)",
+	 "kor_name":"필터이름(KOR)",
          "subfilter":[
             {
-               "name":"서브필터이름",
+               "name":"서브필터이름(ENG)",
+	       "kor_name":"서브필터이름(KOR)"
                "input":{
                   "type":"입력값구분",
                   "data_format":"입력값포맷형식"
-               }
+               },
+	       "user_view":{
+	          "description":"해당필터설명",
+		  "default":"필터기본입력값(디폴트값)",
+		  "ux_category":"카테고리번호"
+	       }
             }
          ]
       }

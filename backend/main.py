@@ -11,31 +11,42 @@ app = Flask(__name__)
 
 ###### FILTER LIST #####
 # http://127.0.0.1:5000/filter_li
+# http://127.0.0.1:5000/filter_li/2
 @app.route('/filter_li/', methods=['GET', ])
-def filter_li():
+@app.route('/filter_li/<int:Filter_SN>', methods=['GET', ])
+def filter_li(Filter_SN=None):
     # mysql connecting info & connect
     key_df = pd.read_csv('aws_db_key.txt', header=None)
     host, user, password, db = key_df[0][0], key_df[0][1], key_df[0][2], key_df[0][3]
     conn = pymysql.connect(host=host, user=user, password=password, db=db)
     curs = conn.cursor()
 
-    df = pd.read_sql("SELECT FL_SN, Filter, Filter_KOR, Subfilter, Subfilter_KOR FROM stocksearch.filter_list;", conn)
+    if Filter_SN == None:
+        df = pd.read_sql("SELECT FL_SN, Filter, Filter_KOR, Subfilter, Subfilter_KOR FROM stocksearch.filter_list;", conn)
 
-    df['subfilter'] = df.apply(lambda x: {'filter_SN': x['FL_SN'], 'name': x['Subfilter'], 'kor_name': x['Subfilter_KOR']}, axis=1)
-    df = df.drop(['filter_SN', 'Subfilter', 'Subfilter_KOR'], axis=1)
+        df['subfilter'] = df.apply(lambda x: {'filter_SN': x['FL_SN'], 'name': x['Subfilter'], 'kor_name': x['Subfilter_KOR']}, axis=1)
+        df = df.drop(['FL_SN', 'Subfilter', 'Subfilter_KOR'], axis=1)
 
-    main_filter = df.drop_duplicates('Filter')
-    result = []
-    for i in range(len(main_filter)):
-        name, kor_name = main_filter.iloc[i].Filter, main_filter.iloc[i].Filter_KOR
-        f_dict = {'name': name, 'kor_name': kor_name}
-        sub_li = []
-        for sub in df[df['Filter'] == name].subfilter:
-            sub_li.append(sub)
-        f_dict['subfilter'] = sub_li
-        result.append(f_dict)
+        main_filter = df.drop_duplicates('Filter')
+        result = []
+        for i in range(len(main_filter)):
+            name, kor_name = main_filter.iloc[i].Filter, main_filter.iloc[i].Filter_KOR
+            f_dict = {'name': name, 'kor_name': kor_name}
+            sub_li = []
+            for sub in df[df['Filter'] == name].subfilter:
+                sub_li.append(sub)
+            f_dict['subfilter'] = sub_li
+            result.append(f_dict)
 
-    result = {'filter': result}
+        result = {'filter': result}
+
+    else:
+        df = pd.read_sql(f"SELECT * FROM stocksearch.filter_list WHERE FL_SN = {Filter_SN};", conn)
+        df['input'] = df.apply(lambda x: {'type': x['input_type'], 'data_format': x['input_format']}, axis=1)
+        df['user_view'] = df.apply(
+            lambda x: {'description': x['description'], 'default': x['default'], 'ux_category': x['ux_category']}, axis=1)
+        df = df.drop(['input_type', 'input_format', 'description', 'default', 'ux_category'], axis=1)
+        result = {'name': df.Subfilter.values[0], 'kor_name': df.Subfilter_KOR.values[0], 'input': df.input.values[0], 'user_view': df.user_view.values[0]}
 
     return json.dumps(result, ensure_ascii=False, indent=4)
 
@@ -174,4 +185,4 @@ def board():
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', debug=True, threaded=True)
+    app.run(host='0.0.0.0', debug=False, threaded=True)

@@ -19,20 +19,22 @@ def filter_li():
     conn = pymysql.connect(host=host, user=user, password=password, db=db)
     curs = conn.cursor()
 
-    df = pd.read_sql("SELECT * FROM stocksearch.filter_list;", conn)
-    filter_set = df.drop_duplicates('Filter').Filter
+    df = pd.read_sql("SELECT FL_SN, Filter, Filter_KOR, Subfilter, Subfilter_KOR FROM stocksearch.filter_list;", conn)
 
-    df['input'] = df.apply(lambda x: {'type': x['input_type'], 'data_format': x['input_format']}, axis=1)
-    df['subfilter'] = df.apply(lambda x: {'name': x['Subfilter'], 'input': x['input']}, axis=1)
+    df['subfilter'] = df.apply(lambda x: {'filter_SN': x['FL_SN'], 'name': x['Subfilter'], 'kor_name': x['Subfilter_KOR']}, axis=1)
+    df = df.drop(['filter_SN', 'Subfilter', 'Subfilter_KOR'], axis=1)
 
+    main_filter = df.drop_duplicates('Filter')
     result = []
-    for f in filter_set:
-        f_dict = {'name': f}
+    for i in range(len(main_filter)):
+        name, kor_name = main_filter.iloc[i].Filter, main_filter.iloc[i].Filter_KOR
+        f_dict = {'name': name, 'kor_name': kor_name}
         sub_li = []
-        for sub in df[df['Filter'] == f].subfilter:
+        for sub in df[df['Filter'] == name].subfilter:
             sub_li.append(sub)
         f_dict['subfilter'] = sub_li
         result.append(f_dict)
+
     result = {'filter': result}
 
     return json.dumps(result, ensure_ascii=False, indent=4)

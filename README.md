@@ -34,53 +34,43 @@
    "filter":[
       {
          "name":"MarketFilter",
+         "kor_name":null,
          "subfilter":[
             {
+               "filter_SN":1,
                "name":"market",
-               "input":{
-                  "type":"market",
-                  "data_format":"KOSPI,KOSDAQ"
-               }
+               "kor_name":null
             },
             {
+               "filter_SN":2,
                "name":"category",
-               "input":{
-                  "type":"category",
-                  "data_format":null
-               }
+               "kor_name":null
             }
          ]
       },
       {
          "name":"PriceFilter",
+         "kor_name":null,
          "subfilter":[
             {
+               "filter_SN":3,
                "name":"updown",
-               "input":{
-                  "type":"min,max",
-                  "data_format":"int,int"
-               }
+               "kor_name":null
             },
             {
+               "filter_SN":4,
                "name":"compare_mean",
-               "input":{
-                  "type":"day,times,updown",
-                  "data_format":"int,flt,str"
-               }
+               "kor_name":null
             },
             {
+               "filter_SN":5,
                "name":"compare_max",
-               "input":{
-                  "type":"times",
-                  "data_format":"flt"
-               }
+               "kor_name":null
             },
             {
+               "filter_SN":6,
                "name":"dist_max",
-               "input":{
-                  "type":"day,inout",
-                  "data_format":"int,str"
-               }
+               "kor_name":null
             }
          ]
       }
@@ -92,6 +82,7 @@
 </details>
 
 ### 서브필터 세부항목 조회
+예시) ```http://127.0.0.1:5000/filter_li```
 
 #### 출력결과(JSON)
 ```json
@@ -107,6 +98,28 @@
    "ux_category":"카테고리번호"
 }
 ```
+
+<details>
+<summary>출력예시 (접기/펼치기)</summary>
+<div markdown="1">
+
+```json
+{
+   "name":"category",
+   "kor_name":"업종",
+   "input":{
+      "type":"category",
+      "data_format":"str"
+   },
+   "user_view":{
+      "description":"종목의 업종",
+      "default":"자동차",
+      "ux_category":1
+   }
+}
+```
+</div>
+</details>
 
 
 ## 종목검색함수 및 쿼리

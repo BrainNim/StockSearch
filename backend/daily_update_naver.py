@@ -35,7 +35,7 @@ daily_df = pd.read_sql("select * from stocksearch.daily_market", conn)
 code_li = daily_df['ID']
 
 # 오늘 장이 열렸었는지 확인
-code = code_li[0]
+code = code_li[286]
 url = f"https://finance.naver.com/item/main.nhn?code={code}"
 response = requests.get(url)
 soup = BeautifulSoup(response.content, "html.parser")
@@ -104,13 +104,18 @@ for code in code_li[:1000]:
     else:
         day2day = txt2int(exday_soup[1].get_text())
 
-    # null값('-') 처리
+    # null값('-' -> 0, nan -> null) 처리
     values_li = [per,  eps,  roe,  pbr,  bps,  revenue,  operating_income,  net_income]
     val_name = ['per','eps','roe','pbr','bps','revenue','operating_income','net_income']
     if '-' in values_li:
         for idx, val in enumerate(values_li):
             if val == '-':
                 globals()[val_name[idx]] = 0
+
+    if True in (pd.isna([values_li])):
+        for idx, val in enumerate(values_li):
+            if pd.isna(val):
+                globals()[val_name[idx]] = 'NULL'
 
     # daily_market 업데이트
     update_sql_1 = f"""UPDATE stocksearch.daily_market

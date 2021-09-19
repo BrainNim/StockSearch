@@ -4,7 +4,11 @@ import pandas as pd
 import time
 import requests
 from bs4 import BeautifulSoup
-# import locale
+import locale
+
+
+import os
+os.chdir('backend')
 
 # today
 import re
@@ -46,10 +50,12 @@ yesterday_df = pd.read_sql("select * from stocksearch.daily_market", conn)
 # 텍스트 - 숫자 전환용
 # locale.setlocale(locale.LC_ALL, 'en_US.UTF8')
 
+
 def txt2int(txt):
-    txt = re.sub(',', '', txt)
-    p = re.compile('\d+')
-    n_li = p.findall(txt)
+    txt_sub = re.sub(',','',txt)
+    p = re.compile('[\-\d]+')  # 음수부호 포함
+    num_txt = p.findall(txt_sub)[0]
+    n_li = p.findall(num_txt)
     result = ''
     for n_txt in n_li:  # 예) '41조 970억' -> 410970
         result += n_txt.zfill(4)
@@ -66,6 +72,46 @@ url = f"https://finance.naver.com/item/main.nhn?code={code}"
 response = requests.get(url)
 soup = BeautifulSoup(response.content, "html.parser")
 
+dfs = pd.read_html(url, encoding='euc-kr')  # 페이지 내 모든 테이블
+
+# 장마감 날짜 확인
+f = soup.select_one("em.date")
+f.span.decompose()
+final_day = f.get_text()
+final_day = re.sub('\.','', final_day).strip()
+
+if today != final_day:
+    print('오늘 아님')
+
+# 마켓(코스피, 코스닥), 업종 크롤링
+market_code = soup.select_one("div.description img")['class'][0]  # 마켓
+category = soup.select_one("div.section.trade_compare > h4 > em a").text  # 업종
+
+# 시가총액, 52주 최고가
+capital = txt2int(dfs[5].iloc[0, 1])  # 시가총액
+highest_price = txt2int(dfs[7].iloc[1, 1].split()[0])  # 52주 최고가
+highest_date = ""
+
+locale.setlocale(locale.LC_ALL, 'en_US.UTF8')
+
+# 기업분석실적
+df = dfs[3].set_index(dfs[3].columns[0])
+
+per = df.loc['PER(배)'][-2]
+eps = df.loc['EPS(원)'][-2]
+roe = df.loc['ROE(지배주주)'][-2]
+pbr = df.loc['PBR(배)'][-2]
+bps = df.loc['BPS(원)'][-2]
+float(dfs[9].loc[0,1][:-1])  # 동일업종 PER(배)
+
+revenue = df.loc['매출액'][-2]
+operating_income = df.loc['영업이익'][-2]
+net_income = df.loc['당기순이익'][-2]
+
+df.loc['부채비율'][-2]
+df.loc['유보율'][-2]
+df.loc['시가배당률(%)'][2]
+
 # 가격 크롤링
 price_soup = soup.select("div.today p.no_today em span")
 price_other_soup = soup.select("table.no_info tr td")
@@ -75,6 +121,10 @@ volume = txt2int(price_other_soup[2].em.span.get_text())  # 거래량
 open = txt2int(price_other_soup[3].em.span.get_text())  # 시가
 low = txt2int(price_other_soup[4].em.span.get_text())  # 저가
 
+
+
+
+
 # 전일대비 가격변동
 exday_soup = soup.select("div.today p.no_exday em span")
 if exday_soup[0].get_text() == '하락':
@@ -82,12 +132,9 @@ if exday_soup[0].get_text() == '하락':
 else:
     day2day = txt2int(exday_soup[1].get_text())
 
-# 상세정보
-detail_soup = soup.select("div.aside_invest_info > div.tab_con1 table")
-capital = txt2int(detail_soup[0].em.get_text())  # 시가총액
 
-# 기업분석실적
-perform_df = soup.select("div.section.cop_analysis")
+
+
 
 
 print(cnt, code, close, high, volume, open, low, capital)

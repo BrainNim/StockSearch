@@ -10,6 +10,8 @@ export default function FilterList() {
       name: 'MarketFilter',
       subfilter: [
         {
+          //복수선택가능
+          //컴마로해서 
           name: 'market',
           input: {
             type: 'market',
@@ -52,7 +54,7 @@ export default function FilterList() {
         {
           name: 'dist_max',
           input: {
-            type: 'day,inout',
+            type: 'day,input',
             data_format: 'int,str',
           },
         },
@@ -260,3 +262,14 @@ function FilterItem({ item }) {
     </View>
   );
 }
+{/* <View style={styles.inner}>
+<Icon
+  name='chevron-down-circle'
+  size={30}
+  onPress={handlePress}
+  color='#8FBBAF'
+  style={styles.close}
+/>
+<Text>조건 선택</Text>
+<FilterList />
+</View> */}

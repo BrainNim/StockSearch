@@ -1,24 +1,14 @@
 import React from 'react'
-import { Text, View } from 'react-native'
+import { ThemeProvider } from 'styled-components'
 import { NavigationContainer } from '@react-navigation/native'
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs'
 import Icon from 'react-native-vector-icons/dist/Ionicons'
 import SearchScreen from './components/SearchScreen'
+import EncyclopediaScreen from './pages/EncyclodiaScreen'
+import NoticeScreen from './pages/NoticeScreen'
+import theme from './theme/theme'
 
-function EncyclopediaScreen () {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>주식 백과!</Text>
-    </View>
-  )
-}
-function NoticeScreen () {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>notice board!</Text>
-    </View>
-  )
-}
+
 
 const Tab = createMaterialBottomTabNavigator()
 
@@ -72,8 +62,10 @@ function MyTabs () {
 
 export default function App () {
   return (
+    <ThemeProvider theme={theme}>
     <NavigationContainer>
       <MyTabs />
     </NavigationContainer>
+    </ThemeProvider>
   )
 }

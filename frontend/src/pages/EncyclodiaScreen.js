@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import HeaderTitle from '../components/header/HeaderTitle';
-import Icon from 'react-native-vector-icons/dist/Ionicons';
 
 export default function EncyclopediaScreen() {
   return (

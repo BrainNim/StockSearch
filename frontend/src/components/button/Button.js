@@ -1,24 +1,25 @@
-import React from 'react'
-import { StyleSheet, TouchableOpacity, Text } from 'react-native'
+import React from 'react';
+import { StyleSheet, TouchableOpacity, Text } from 'react-native';
+import styled from 'styled-components/native';
 
-export default function RoundButton ({ text, onPress }) {
+export default function RoundButton({ text, onPress }) {
   return (
     <TouchableOpacity
       onPress={onPress}
       style={styles.button}
       activeOpacity={0.4}>
-      <Text style={styles.text}>{text}</Text>
+      <TextStyle>{text}</TextStyle>
     </TouchableOpacity>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: '#8FBBAF',
+    backgroundColor: '#A590EF',
     alignItems: 'center',
     justifyContent: 'center',
-    width: 70,
-    height: 70,
+    width: 46,
+    height: 46,
     borderRadius: 35,
 
     ...Platform.select({
@@ -35,10 +36,10 @@ const styles = StyleSheet.create({
       },
     }),
   },
+});
 
-  text: {
-    fontSize: 30,
-    textAlign: 'center',
-    color: '#D5EEBB',
-  },
-})
+const TextStyle = styled.Text`
+  font-size: 18px;
+  text-align: center;
+  color: #ffffff;
+`;

@@ -53,7 +53,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   subtitle: {
-    fontSize: 25,
+    fontSize: 17,
+    fontWeight: 'bold',
   },
   addWrapper: {
     alignItems: 'center',

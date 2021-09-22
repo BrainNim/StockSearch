@@ -1,18 +1,19 @@
 import React from 'react';
 import { useState } from 'react';
-import { Text, View, StyleSheet, Button } from 'react-native';
+import { Text, View, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/dist/Ionicons';
 import RoundButton from './button/Button';
 import Modal from 'react-native-modal';
 import FilterList from './FilterList';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HeaderTitle from './header/HeaderTitle';
+import styled from 'styled-components/native';
 
 function Main({ navigation }) {
-  const [isModalVisible, setModalVisible] = useState(false);
+  const [isModalVisible, setModalVisible] = useState(true);
 
   const handlePress = () => {
-    navigation.navigate('Search');
+    setModalVisible(!isModalVisible);
   };
   return (
     <>
@@ -26,23 +27,39 @@ function Main({ navigation }) {
           />
           <Text style={styles.subtitle}>조건 추가하기</Text>
         </View>
-        {/* <Modal isVisible={isModalVisible} style={styles.modal}> */}
-        {/* <View style={styles.inner}>
-          <Icon
-            name='chevron-down-circle'
-            size={30}
-            onPress={handlePress}
-            color='#8FBBAF'
-            style={styles.close}
-          />
-          <Text>조건 선택</Text>
-          <FilterList />
-        </View> */}
-        {/* </Modal> */}
+        <StyleModal
+          isVisible={isModalVisible}
+          customBackdrop={
+            <Backdrop onPress={() => setModalVisible(!isModalVisible)} />
+          }>
+          <View style={styles.inner}>
+            <Icon
+              name="chevron-down-circle"
+              size={30}
+              onPress={handlePress}
+              color="#8FBBAF"
+              style={styles.close}
+            />
+            <Text>조건 선택</Text>
+            <FilterList />
+          </View>
+        </StyleModal>
       </View>
     </>
   );
 }
+const Backdrop = styled.TouchableOpacity`
+  width: 100%;
+  height: 80%;
+  background-color: black;
+  opacity: 0.7;
+`;
+
+const StyleModal = styled(Modal)`
+  position: absolute;
+  bottom: 0;
+  margin: 0;
+`;
 
 const styles = StyleSheet.create({
   view: {
@@ -70,9 +87,8 @@ const styles = StyleSheet.create({
   },
   inner: {
     backgroundColor: 'white',
-    width: '80%',
+    width: '100%',
     height: '80%',
-    borderRadius: 10,
     paddingVertical: 40,
     paddingHorizontal: 20,
   },

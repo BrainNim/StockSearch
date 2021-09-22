@@ -2,182 +2,16 @@ import React from 'react';
 import { useState } from 'react';
 import { Text, View, StyleSheet, FlatList } from 'react-native';
 import { Button } from 'react-native-vector-icons/dist/Ionicons';
-
+import filter from '../mock';
 
 export default function FilterList() {
-  const filter = [
-    {
-      name: 'MarketFilter',
-      subfilter: [
-        {
-          //복수선택가능
-          //컴마로해서 
-          name: 'market',
-          input: {
-            type: 'market',
-            data_format: 'KOSPI,KOSDAQ',
-          },
-        },
-        {
-          name: 'category',
-          input: {
-            type: 'category',
-            data_format: '식품,car,화학',
-          },
-        },
-      ],
-    },
-    {
-      name: 'PriceFilter',
-      subfilter: [
-        {
-          name: 'updown',
-          input: {
-            type: 'min,max',
-            data_format: 'int,int',
-          },
-        },
-        {
-          name: 'compare_mean',
-          input: {
-            type: 'day,times,updown',
-            data_format: 'int,flt,str',
-          },
-        },
-        {
-          name: 'compare_max',
-          input: {
-            type: 'times',
-            data_format: 'flt',
-          },
-        },
-        {
-          name: 'dist_max',
-          input: {
-            type: 'day,input',
-            data_format: 'int,str',
-          },
-        },
-      ],
-    },
-    {
-      name: 'VolumeFilter',
-      subfilter: [
-        {
-          name: 'updown',
-          input: {
-            type: 'min,max',
-            data_format: 'int,int',
-          },
-        },
-        {
-          name: 'compare_mean',
-          input: {
-            type: 'day,times,updown',
-            data_format: 'int,flt,str',
-          },
-        },
-      ],
-    },
-    {
-      name: 'PBRFilter',
-      subfilter: [
-        {
-          name: 'updown',
-          input: {
-            type: 'min,max',
-            data_format: 'flt,flt',
-          },
-        },
-        {
-          name: 'top',
-          input: {
-            type: 'topdown,N',
-            data_format: 'str,int',
-          },
-        },
-      ],
-    },
-    {
-      name: 'PERFilter',
-      subfilter: [
-        {
-          name: 'updown',
-          input: {
-            type: 'min,max',
-            data_format: 'flt,flt',
-          },
-        },
-        {
-          name: 'top',
-          input: {
-            type: 'topdown,N',
-            data_format: 'str,int',
-          },
-        },
-      ],
-    },
-    {
-      name: 'ROAFilter',
-      subfilter: [
-        {
-          name: 'updown',
-          input: {
-            type: 'min,max',
-            data_format: 'flt,flt',
-          },
-        },
-        {
-          name: 'top',
-          input: {
-            type: 'topdown,N',
-            data_format: 'str,int',
-          },
-        },
-      ],
-    },
-    {
-      name: 'ROEFilter',
-      subfilter: [
-        {
-          name: 'updown',
-          input: {
-            type: 'min,max',
-            data_format: 'flt,flt',
-          },
-        },
-        {
-          name: 'top',
-          input: {
-            type: 'topdown,N',
-            data_format: 'str,int',
-          },
-        },
-      ],
-    },
-    {
-      name: 'CrossFilter',
-      subfilter: [
-        {
-          name: 'goldencross',
-          input: {
-            type: 'short,long',
-            data_format: 'int,int',
-          },
-        },
-        {
-          name: 'deadcross',
-          input: {
-            type: 'short,long',
-            data_format: 'int,int',
-          },
-        },
-      ],
-    },
-  ];
-
   const [fidx, setIdx] = useState(0);
-  const filterIdx = filter.map((v, idx) => ({ idx, name: v.name, setIdx , fidx}));
+  const filterIdx = filter.map((v, idx) => ({
+    idx,
+    name: v.name,
+    setIdx,
+    fidx,
+  }));
   return (
     <View style={styles.flexColum}>
       <View style={styles.view}>
@@ -213,17 +47,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '50%',
     paddingVertical: 19,
-    backgroundColor: '#FFE3DE'
+    backgroundColor: '#FFE3DE',
   },
   button: {
     width: '100%',
     borderBottomRightRadius: 0,
     borderTopRightRadius: 0,
-    backgroundColor: '#A3DDCB'
+    backgroundColor: '#A3DDCB',
   },
-  subbutton:{
+  subbutton: {
     width: 140,
-    backgroundColor: '#DBE6FD'
+    backgroundColor: '#DBE6FD',
   },
   add: {
     borderRadius: 40,
@@ -231,9 +65,9 @@ const styles = StyleSheet.create({
 });
 
 function FilterMainItem({ item }) {
-  let style = styles.button
-  if(item.idx === item.fidx){
-    style = {...styles.button , backgroundColor: '#FFE3DE'}
+  let style = styles.button;
+  if (item.idx === item.fidx) {
+    style = { ...styles.button, backgroundColor: '#FFE3DE' };
   }
   const handlePress = () => {
     item.setIdx(item.idx);
@@ -248,21 +82,21 @@ function FilterMainItem({ item }) {
   );
 }
 
-
 function FilterItem({ item }) {
-  const handlePress = (itemName) => {
+  const handlePress = itemName => {
     console.log(itemName);
   };
 
   return (
     <View View style={styles.main}>
       <Button onPress={handlePress} style={styles.subbutton}>
-      <Text  onPress={() => handlePress(item.name)}>{item.name}</Text>
+        <Text onPress={() => handlePress(item.name)}>{item.name}</Text>
       </Button>
     </View>
   );
 }
-{/* <View style={styles.inner}>
+{
+  /* <View style={styles.inner}>
 <Icon
   name='chevron-down-circle'
   size={30}
@@ -272,4 +106,5 @@ function FilterItem({ item }) {
 />
 <Text>조건 선택</Text>
 <FilterList />
-</View> */}
+</View> */
+}

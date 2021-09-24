@@ -12,10 +12,9 @@ start_time = time.time()
 # today
 now = datetime.datetime.now()
 today = now.strftime("%Y.%m.%d")
-print(today)
 
 # mysql connecting info & connect
-key_df = pd.read_csv('./aws_db_key.txt', header=None)
+key_df = pd.read_csv('aws_db_key.txt', header=None)
 host, user, password, db = key_df[0][0], key_df[0][1], key_df[0][2], key_df[0][3]
 conn = pymysql.connect(host=host, user=user, password=password, db=db)
 curs = conn.cursor()
@@ -141,11 +140,14 @@ if __name__ == '__main__':
     # 장마감 날짜 확인
     f = soup.select_one("em.date")
     f.span.decompose()
-    final_day = f.get_text().strip()
+    final_day = f.get_text().strip().split()[0]
+    print('today :', today)
+    print('recent open day :', final_day)
     if today != final_day:
-        print('오늘 아님')
+        print('market is closed today')
 
-    # 멀티 쓰레딩 Pool 사용
-    pool = Pool(processes=4)  # 3개의 프로세스를 사용합니다.
-    pool.map(stock_crawling, code_li)  # pool에 일을 던져줍니다.
-    print("--- %s seconds ---" % (time.time() - start_time))
+    else:
+        # 멀티 쓰레딩 Pool 사용
+        pool = Pool(processes=4)  # 4개의 프로세스를 사용합니다.
+        pool.map(stock_crawling, code_li)  # pool에 일을 던져줍니다.
+        print("--- %s seconds ---" % (time.time() - start_time))

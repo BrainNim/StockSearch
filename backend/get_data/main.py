@@ -92,7 +92,7 @@ def stock_crawling(code):
     if high >= ex_highest[1]:
         highest_date = final_day
     else:
-        highest_price = ex_highest[0].strftime("%Y.%m.%d")
+        highest_date = ex_highest[0].strftime("%Y.%m.%d")
 
 
     # null값('-' -> 0, nan -> null) 처리

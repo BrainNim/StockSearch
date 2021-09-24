@@ -90,7 +90,7 @@ def stock_crawling(code):
                 and High = (SELECT max(High) FROM stocksearch.past_market where id = "{code}") Order by Date DESC;""")
     ex_highest = curs.fetchone()
     if high >= ex_highest[1]:
-        highest_date = final_day
+        highest_date = today
     else:
         highest_date = ex_highest[0].strftime("%Y.%m.%d")
 
@@ -116,12 +116,11 @@ def stock_crawling(code):
                     Highest_Price = {highest_price}, Highest_Date = "{highest_date}"
                     WHERE ID = "{code}"; """
     curs.execute(update_sql_1)
-    conn.commit()
 
     # # past_market 업데이트
     update_sql_2 = f"""INSERT INTO stocksearch.past_market
             (ID, Date, Open, High, Low, Close, Volume) Values
-            ('{code}', "{final_day}", {open}, {high}, {low}, {close}, {volume}); """
+            ('{code}', "{today}", {open}, {high}, {low}, {close}, {volume}); """
     curs.execute(update_sql_2)
     conn.commit()
 

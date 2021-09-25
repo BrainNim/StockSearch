@@ -2,6 +2,13 @@ import pandas as pd
 import datetime
 
 
+def mk_temp(df, conn):
+    id_li = df.ID.to_list()
+    temp_curs = conn.cursor()
+    temp_curs.execute("""CREATE TEMPORARY TABLE temp_id(ID VARCHAR(8))""")
+    temp_curs.executemany("INSERT INTO stocksearch.temp_id (ID) VALUES (%s)", id_li)
+
+
 class MarketFilter:
     def __init__(self, conn):
         self.conn = conn
@@ -28,10 +35,16 @@ class PriceFilter:
 
     def compare_mean(self, day, times, updown, df):  # 기간평균가와 현재가 비교
         day, times = int(day), float(times)
-        code_tuple = tuple(df['ID'])
-        mean_df = pd.read_sql(f"""SELECT ID, AVG(Close) as Mean  FROM stocksearch.past_market 
+        # mean_df = pd.read_sql(f"""SELECT ID, AVG(Close) as Mean FROM stocksearch.past_market
+        #                     WHERE Date >= Date(subdate("{self.recent_date}", INTERVAL {day} DAY))
+        #                     GROUP BY ID;""", self.conn)
+        mk_temp(df, self.conn)
+        mean_df = pd.read_sql(f"""SELECT ID, AVG(Close) as Mean FROM
+                            (SELECT past.* FROM stocksearch.past_market AS past
+                            JOIN temp_id AS id ON past.ID = id.ID) tb
                             WHERE Date >= Date(subdate("{self.recent_date}", INTERVAL {day} DAY))
                             GROUP BY ID;""", self.conn)
+
         new_df = pd.merge(mean_df, df, left_on='ID', right_on='ID', how='inner')
         if updown == 'up':
             new_df = new_df[new_df['Close'] >= new_df['Mean'] * times]

@@ -1,4 +1,5 @@
 import json
+import time
 import pymysql
 import pandas as pd
 from flask import Flask, request
@@ -70,6 +71,8 @@ def filter_li(Filter_SN=None):
 # http://127.0.0.1:5000/?MarketFilter.market=KOSPI&PriceFilter.updown=1000,10000&PriceFilter.compare_max=0.7&CrossFilter.goldencross=5,20
 @app.route('/', methods=['GET', ])
 def filter():
+    start_time = time.time()
+
     # mysql connecting info & connect
     key_df = pd.read_csv('aws_db_key.txt', header=None)
     host, user, password, db = key_df[0][0], key_df[0][1], key_df[0][2], key_df[0][3]
@@ -122,6 +125,8 @@ def filter():
 
     # 요청 log를 DB에 저장
     save_request_log(query, curs, conn)
+
+    print("--- %s seconds ---" % (time.time() - start_time))
 
     return json.dumps(answer, ensure_ascii=False, indent=4)
 
@@ -196,4 +201,4 @@ def board():
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', debug=False, threaded=True)
+    app.run(host='0.0.0.0', debug=True, threaded=True)

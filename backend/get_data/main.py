@@ -59,15 +59,28 @@ def stock_crawling(code):
     roe = df.loc['ROE(지배주주)'][-2]
     pbr = df.loc['PBR(배)'][-2]
     bps = df.loc['BPS(원)'][-2]
-    # float(dfs[9].loc[0,1][:-1])  # 동일업종 PER(배)
+    group_per = float(dfs[9].loc[0,1][:-1])  # 동일업종 PER(배)
 
     revenue = df.loc['매출액'][-2]
     operating_income = df.loc['영업이익'][-2]
     net_income = df.loc['당기순이익'][-2]
+    dividend = df.loc['시가배당률(%)'][2]
 
-    # df.loc['부채비율'][-2]
-    # df.loc['유보율'][-2]
-    # df.loc['시가배당률(%)'][2]
+    debt = df.loc['부채비율'][-2]
+    debts, debt_continuous = df.loc['부채비율'][-6:-1], 1  # 부채가 몇년 연속 줄었는가
+    for i in range(1,5):
+        if debts[-i] < debts[-i-1]:
+            debt_continuous += 1
+        else:
+            break
+
+    retention = df.loc['유보율'][-2]
+    retentions, retention_continuous = df.loc['유보율'][-6:-1], 1  # 유보율이 몇년 연속 늘었는가
+    for i in range(1,5):
+        if retentions[-i] >= retentions[-i-1]:
+            retention_continuous += 1
+        else:
+            break
 
     # 가격 크롤링
     price_soup = soup.select("div.today p.no_today em span")
@@ -96,7 +109,7 @@ def stock_crawling(code):
 
 
     # null값('-' -> 0, nan -> null) 처리
-    values_li = [per,  eps,  roe,  pbr,  bps,  revenue,  operating_income,  net_income]
+    values_li = [per,  eps,  roe,  pbr,  bps,  revenue,  operating_income,  net_income, dividend]
     if '-' in values_li:
         for idx, val in enumerate(values_li):
             if val == '-':
@@ -105,13 +118,14 @@ def stock_crawling(code):
         for idx, val in enumerate(values_li):
             if pd.isna(val):
                 values_li[idx] = 'NULL'
-    per, eps, roe, pbr, bps, revenue, operating_income, net_income = values_li
+    per, eps, roe, pbr, bps, revenue, operating_income, net_income, dividend = values_li
 
     # daily_market 업데이트
     update_sql_1 = f"""UPDATE stocksearch.daily_market
-                    SET Name = "{name}", Market = "{market_code}", Capital = {capital},
-                    PER = {per}, EPS = {eps}, ROE = {roe}, PBR = {pbr}, BPS = {bps},
-                    Revenue = {revenue}, Operating_Income = {operating_income}, Net_Income = {net_income},
+                    SET Name = "{name}", Market = "{market_code}", Category="{category}", Capital = {capital},
+                    PER = {per}, EPS = {eps}, ROE = {roe}, PBR = {pbr}, BPS = {bps}, Group_PER = {group_per}
+                    Revenue = {revenue}, Operating_Income = {operating_income}, Net_Income = {net_income}, Dividend = {dividend}, 
+                    Debt = {debt}, Debt_continuous = {debt_continuous}, Retention = {retention}, Retention_Continuous = {retention_continuous},
                     Open = {open}, High = {high}, Low = {low}, Close = {close}, Volume = {volume}, DaytoDay = {day2day},
                     Highest_Price = {highest_price}, Highest_Date = "{highest_date}"
                     WHERE ID = "{code}"; """

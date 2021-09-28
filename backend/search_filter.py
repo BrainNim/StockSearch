@@ -2,11 +2,21 @@ import pandas as pd
 import datetime
 
 
-def mk_temp(df, conn):
+def mk_temp(df, conn, times=0):
     id_li = df.ID.to_list()
     temp_curs = conn.cursor()
-    temp_curs.execute("""CREATE TEMPORARY TABLE temp_id(ID VARCHAR(8))""")
+    temp_curs.execute("CREATE TEMPORARY TABLE temp_id(ID VARCHAR(8))")
     temp_curs.executemany("INSERT INTO stocksearch.temp_id (ID) VALUES (%s)", id_li)
+
+    if times > 0:
+        for i in range(1, times):
+            temp_curs.execute(f"CREATE TEMPORARY TABLE temp{i}_id(ID VARCHAR(8))")
+            temp_curs.executemany(f"INSERT INTO stocksearch.temp{i}_id (ID) VALUES (%s)", id_li)
+
+
+def drop_temp(conn):
+    temp_curs = conn.cursor()
+    temp_curs.execute("""DROP TEMPORARY TABLE temp_id""")
 
 
 class MarketFilter:
@@ -35,16 +45,13 @@ class PriceFilter:
 
     def compare_mean(self, day, times, updown, df):  # 기간평균가와 현재가 비교
         day, times = int(day), float(times)
-        # mean_df = pd.read_sql(f"""SELECT ID, AVG(Close) as Mean FROM stocksearch.past_market
-        #                     WHERE Date >= Date(subdate("{self.recent_date}", INTERVAL {day} DAY))
-        #                     GROUP BY ID;""", self.conn)
         mk_temp(df, self.conn)
         mean_df = pd.read_sql(f"""SELECT ID, AVG(Close) as Mean FROM
                             (SELECT past.* FROM stocksearch.past_market AS past
                             JOIN temp_id AS id ON past.ID = id.ID) tb
                             WHERE Date >= Date(subdate("{self.recent_date}", INTERVAL {day} DAY))
                             GROUP BY ID;""", self.conn)
-
+        drop_temp(self.conn)
         new_df = pd.merge(mean_df, df, left_on='ID', right_on='ID', how='inner')
         if updown == 'up':
             new_df = new_df[new_df['Close'] >= new_df['Mean'] * times]
@@ -81,9 +88,14 @@ class VolumeFilter:
 
     def compare_mean(self, day, times, updown, df):
         day, times = int(day), float(times)
-        mean_df = pd.read_sql(f"""SELECT ID, AVG(Volume) as Mean FROM stocksearch.past_market 
+
+        mk_temp(df, self.conn)
+        mean_df = pd.read_sql(f"""SELECT ID, AVG(Volume) as Mean FROM
+                            (SELECT past.* FROM stocksearch.past_market AS past
+                            JOIN temp_id AS id ON past.ID = id.ID) tb
                             WHERE Date >= Date(subdate("{self.recent_date}", INTERVAL {day} DAY))
                             GROUP BY ID;""", self.conn)
+        drop_temp(self.conn)
         new_df = pd.merge(mean_df, df, left_on='ID', right_on='ID', how='inner')
         if updown == 'up':
             new_df = new_df[new_df['Volume'] >= new_df['Mean'] * times]
@@ -182,32 +194,40 @@ class CrossFilter:
         long_ago = self.schedule.iloc[long].values[0]
         # TS: TodayShort, TL: TodayLong, YS: YesterdayShort, YL:YesterdayLong
         cross_sql = f"""select TS.ID, TS, TL, YS, YL from 
-                            (SELECT ID, AVG(Close) as TS FROM stocksearch.past_market 
+                            (SELECT ID, AVG(Close) as TS FROM (SELECT past.* FROM stocksearch.past_market AS past
+                                                                JOIN temp_id AS id ON past.ID = id.ID) tb
                                                         WHERE Date > "{short_ago}"
                                                         GROUP BY ID) as TS
                             join
-                            (SELECT ID, AVG(Close) as TL FROM stocksearch.past_market 
+                            (SELECT ID, AVG(Close) as TL FROM (SELECT past.* FROM stocksearch.past_market AS past
+                                                                JOIN temp1_id AS id ON past.ID = id.ID) tb
                                                         WHERE Date > "{long_ago}"
                                                         GROUP BY ID) as TL on TS.ID = TL.ID
                             join
-                            (SELECT ID, AVG(Close) as YS FROM stocksearch.past_market 
+                            (SELECT ID, AVG(Close) as YS FROM (SELECT past.* FROM stocksearch.past_market AS past
+                                                                JOIN temp2_id AS id ON past.ID = id.ID) tb
                                                         WHERE Date >= "{short_ago}" and Date < "{self.recent_date}"
                                                         GROUP BY ID) as YS on TS.ID = YS.ID
                             join
-                            (SELECT ID, AVG(Close) as YL FROM stocksearch.past_market 
+                            (SELECT ID, AVG(Close) as YL FROM (SELECT past.* FROM stocksearch.past_market AS past
+                                                                JOIN temp3_id AS id ON past.ID = id.ID) tb
                                                         WHERE Date >= "{long_ago}" and Date < Date "{self.recent_date}"
                                                         GROUP BY ID) as YL on TS.ID = YL.ID ;"""
         return cross_sql
 
     def goldencross(self, short, long, df):
         goldencross_sql = self.get_cross_sql(short, long)
+        mk_temp(df, self.conn, times=4)
         mean_df = pd.read_sql(goldencross_sql, self.conn)
+        drop_temp(self.conn)
+
         mean_df = mean_df[(mean_df['TS'] > mean_df['TL']) & (mean_df['YS'] < mean_df['YL'])]
         new_df = pd.merge(mean_df, df, left_on='ID', right_on='ID', how='inner')
         new_df = new_df.drop(['TS', 'TL', 'YS', 'YL'], axis=1)
         return new_df
 
     def deadcross(self, short, long, df):
+        mk_temp(df, self.conn, times=4)
         deadcross_sql = self.get_cross_sql(short, long)
         mean_df = pd.read_sql(deadcross_sql, self.conn)
         mean_df = mean_df[(mean_df['TS'] < mean_df['TL']) & (mean_df['YS'] > mean_df['YL'])]
@@ -215,3 +235,5 @@ class CrossFilter:
         new_df = new_df.drop(['TS', 'TL', 'YS', 'YL'], axis=1)
         return new_df
 
+# (SELECT past.* FROM stocksearch.past_market AS past
+#                                                                 JOIN temp_id AS id ON past.ID = id.ID) tb

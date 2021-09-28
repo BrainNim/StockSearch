@@ -7,16 +7,18 @@ def mk_temp(df, conn, times=0):
     temp_curs = conn.cursor()
     temp_curs.execute("CREATE TEMPORARY TABLE temp_id(ID VARCHAR(8))")
     temp_curs.executemany("INSERT INTO stocksearch.temp_id (ID) VALUES (%s)", id_li)
-
     if times > 0:
         for i in range(1, times):
             temp_curs.execute(f"CREATE TEMPORARY TABLE temp{i}_id(ID VARCHAR(8))")
             temp_curs.executemany(f"INSERT INTO stocksearch.temp{i}_id (ID) VALUES (%s)", id_li)
 
 
-def drop_temp(conn):
+def drop_temp(conn, times=0):
     temp_curs = conn.cursor()
-    temp_curs.execute("""DROP TEMPORARY TABLE temp_id""")
+    temp_curs.execute("DROP TEMPORARY TABLE temp_id")
+    if times > 0:
+        for i in range(1, times):
+            temp_curs.execute(f"DROP TEMPORARY TABLE temp{i}_id")
 
 
 class MarketFilter:

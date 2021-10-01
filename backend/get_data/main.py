@@ -69,7 +69,7 @@ def stock_crawling(code):
     debt = df.loc['부채비율'][-2]
     debts, debt_continuous = df.loc['부채비율'][-6:-1], 1  # 부채가 몇년 연속 줄었는가
     for i in range(1,5):
-        if debts[-i] < debts[-i-1]:
+        if float(debts[-i]) < float(debts[-i-1]):
             debt_continuous += 1
         else:
             break
@@ -77,7 +77,7 @@ def stock_crawling(code):
     retention = df.loc['유보율'][-2]
     retentions, retention_continuous = df.loc['유보율'][-6:-1], 1  # 유보율이 몇년 연속 늘었는가
     for i in range(1,5):
-        if retentions[-i] >= retentions[-i-1]:
+        if float(retentions[-i]) >= float(retentions[-i-1]):
             retention_continuous += 1
         else:
             break
@@ -123,7 +123,7 @@ def stock_crawling(code):
     # daily_market 업데이트
     update_sql_1 = f"""UPDATE stocksearch.daily_market
                     SET Name = "{name}", Market = "{market_code}", Category="{category}", Capital = {capital},
-                    PER = {per}, EPS = {eps}, ROE = {roe}, PBR = {pbr}, BPS = {bps}, Group_PER = {group_per}
+                    PER = {per}, EPS = {eps}, ROE = {roe}, PBR = {pbr}, BPS = {bps}, Group_PER = {group_per},
                     Revenue = {revenue}, Operating_Income = {operating_income}, Net_Income = {net_income}, Dividend = {dividend}, 
                     Debt = {debt}, Debt_continuous = {debt_continuous}, Retention = {retention}, Retention_Continuous = {retention_continuous},
                     Open = {open}, High = {high}, Low = {low}, Close = {close}, Volume = {volume}, DaytoDay = {day2day},

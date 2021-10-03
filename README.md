@@ -164,7 +164,19 @@
 |--------------|-------|----------------------------|------------------------------------------------------------|------------------------------------|
 | goldencross  | 2     | short,long  </br>(int,int) | ('short'일평균선과 'long'일평균선이 골든크로스)에 부합하는 종목 | CrossFilter.goldencross=5,20       |
 | deadcross    | 2     | short,long  </br>(int,int) | ('short'일평균선과 'long'일평균선이 데드크로스)에 부합하는 종목 | CrossFilter.daedcross=5,20         |
+
+### DebtFilter
+| 세부필터     |입력값수| 입력값상세                 | 설명                                             | 쿼리예시                  |
+|--------------|-------|----------------------------|--------------------------------------------------|---------------------------|
+| updown       | 2     | min,max  </br>(flt,flt)    | ('min' < 부채율 < 'max')에 부합하는 종목          | DebtFilter.updown=0,200   |
+| continuous   | 1     | quarter  </br>(int)        | 부채율이 'quarter'분기 이상동안 연속 감소한 종목  | DebtFilter.continuous=5   |
   
+### RetentionFilter
+| 세부필터     |입력값수| 입력값상세                 | 설명                                             | 쿼리예시                      |
+|--------------|-------|----------------------------|--------------------------------------------------|-------------------------------|
+| updown       | 2     | min,max  </br>(flt,flt)    | ('min' < 유보율 < 'max')에 부합하는 종목          | RetentionFilter.updown=0,20   |
+| continuous   | 1     | quarter  </br>(int)        | 유보율이 'quarter'분기 이상동안 연속 증가한 종목  | RetentionFilter.continuous=5  |
+
 
 ### 출력 결과(JSON)
 ```

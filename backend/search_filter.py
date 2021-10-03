@@ -237,5 +237,32 @@ class CrossFilter:
         new_df = new_df.drop(['TS', 'TL', 'YS', 'YL'], axis=1)
         return new_df
 
-# (SELECT past.* FROM stocksearch.past_market AS past
-#                                                                 JOIN temp_id AS id ON past.ID = id.ID) tb
+
+class DebtFilter:
+    def __init__(self, conn):
+        self.conn = conn
+
+    def updown(self, down, up, df):
+        down, up = float(down), float(up)
+        new_df = df[(df['Debt'] <= up) & (df['Debt'] >= down)]
+        return new_df
+
+    def continuous(self, quarter, df):
+        quarter = int(quarter)
+        new_df = df[df['Debt_continuous'] >= quarter]
+        return new_df
+
+
+class RetentionFilter:
+    def __init__(self, conn):
+        self.conn = conn
+
+    def updown(self, down, up, df):
+        down, up = float(down), float(up)
+        new_df = df[(df['Retention'] <= up) & (df['Retention'] >= down)]
+        return new_df
+
+    def continuous(self, quarter, df):
+        quarter = int(quarter)
+        new_df = df[df['Retention_Continuous'] >= quarter]
+        return new_df

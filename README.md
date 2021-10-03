@@ -154,6 +154,7 @@
 |              | top          | 2     | topdown,N   </br>(str,int) | (PBR값이 'topdown(상위/하위)' N위)에 부합하는 종목            | PBRFilter.top=top,20               |
 | PERFilter    | updown       | 2     | min,max     </br>(flt,flt) | ('min' < PER값 < 'max')에 부합하는 종목                      | PERFilter.updown=1.0,3.0           |
 |              | top          | 2     | topdown,N   </br>(str,int) | (PER값이 'topdown(상위/하위)' N위)에 부합하는 종목            | PERFilter.top=top,20               |
+|              | compare_group| 2     | times,updown</br>(flt,str) | (PER값이 동일업종PER의 'times'배 'updown(이상/이하)')에 부합하는 종목| PERFilter.compare_group=0.5,down |
 | ROAFilter    | updown       | 2     | min,max     </br>(flt,flt) | ('min' < ROA값 < 'max')에 부합하는 종목                      | ROAFilter.updown=1.0,3.0           |
 |              | top          | 2     | topdown,N   </br>(str,int) | (ROA값이 'topdown(상위/하위)' N위)에 부합하는 종목            | ROAFilter.top=top,20               |
 | ROEFilter    | updown       | 2     | min,max     </br>(flt,flt) | ('min' < ROE값 < 'max')에 부합하는 종목                      | ROEFilter.updown=1.0,3.0           |

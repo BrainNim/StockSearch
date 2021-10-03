@@ -147,6 +147,14 @@ class PERFilter:
             new_df = df.sort_values(by='PER', ascending=True).head(n)
         return new_df
 
+    def compare_group(self, times, updown, df):
+        times = float(times)
+        if updown == "up":
+            new_df = df[df['PER'] >= df['Group_PER']*times]
+        else:
+            new_df = df[df['PER'] <= df['Group_PER']*times]
+        return new_df
+
 
 class ROAFilter:
     def __init__(self, conn):

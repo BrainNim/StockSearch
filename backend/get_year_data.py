@@ -56,7 +56,5 @@ def update(start_num=0, del_chk = False):
         except:
             print(idx, code, '에러')
 
-    kiwoom.disconnect()
-
     conn.close()
 

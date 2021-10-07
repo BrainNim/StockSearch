@@ -96,6 +96,10 @@ def filter():
         filter_func = getattr(globals()[func](conn), method)
         df = filter_func(*values, df)
 
+    # 조건에 부합하는 종목이 없을 경우
+    if len(df) == 0:
+        return "조건에 부합하는 종목이 없습니다."
+
     # result에 필요한 칼럼 정보
     cols = ['Name', 'ID', 'Close', 'Volume', 'DaytoDay']
     df = df[cols]

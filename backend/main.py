@@ -17,7 +17,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 def scheduler():
     system("""python3 get_data/main.py""")  # 로컬에서 테스트할 때: python / ec2에서 실행할 때: python3
 sched = BackgroundScheduler(daemon=True)
-sched.add_job(scheduler, 'interval', days=1, start_date='2021-10-07 15:30:10')  # 장마감 10초후부터 크롤링
+sched.add_job(scheduler, 'interval', days=1, start_date='2021-10-07 16:10:00')  # 장마감 10초후부터 크롤링
 sched.start()
 
 

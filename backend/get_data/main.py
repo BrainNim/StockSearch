@@ -6,6 +6,7 @@ import requests
 import re
 from bs4 import BeautifulSoup
 from multiprocessing import Pool
+import get_code
 
 # 시작시간
 start_time = time.time()
@@ -14,11 +15,13 @@ now = datetime.datetime.now()
 today = now.strftime("%Y.%m.%d")
 
 # mysql connecting info & connect
-key_df = pd.read_csv('aws_db_key.txt', header=None)
+key_df = pd.read_csv('../aws_db_key.txt', header=None)
 host, user, password, db = key_df[0][0], key_df[0][1], key_df[0][2], key_df[0][3]
 conn = pymysql.connect(host=host, user=user, password=password, db=db)
 curs = conn.cursor()
 
+# get code
+get_code.from_xls(conn)
 
 def txt2int(txt):
     txt_sub = re.sub(',', '', txt)
@@ -32,7 +35,7 @@ def txt2int(txt):
 
 # 종목별 오늘 시황 업데이트
 def stock_crawling(code):
-    print(code)
+    # print(code)
 
     url = f"https://finance.naver.com/item/main.nhn?code={code}"
     response = requests.get(url)
@@ -44,7 +47,7 @@ def stock_crawling(code):
     name = soup.select_one("div.wrap_company h2").text
 
     # 마켓(코스피, 코스닥), 업종 크롤링
-    market_code = soup.select_one("div.description img")['class'][0]  # 마켓
+    market_code = soup.select_one("div.description img")['class'][0].upper()  # 마켓
     category = soup.select_one("div.section.trade_compare > h4 > em a").text  # 업종
 
     # 시가총액, 52주 최고가
@@ -138,29 +141,38 @@ def stock_crawling(code):
     curs.execute(update_sql_2)
     conn.commit()
 
+#
+# if __name__ == '__main__':
+#     # 종목리스트 선출
+#     daily_df = pd.read_sql("select * from stocksearch.daily_market", conn)
+#     code_li = daily_df['ID']
+#
+#     # 오늘 장이 열렸었는지 확인
+#     code = code_li[0]
+#     url = f"https://finance.naver.com/item/main.nhn?code={code}"
+#     response = requests.get(url)
+#     soup = BeautifulSoup(response.content, "html.parser")
+#
+#     # 장마감 날짜 확인
+#     f = soup.select_one("em.date")
+#     f.span.decompose()
+#     final_day = f.get_text().strip().split()[0]
+#     print('today :', today)
+#     print('recent open day :', final_day)
+#     if today != final_day:
+#         print('market is closed today')
+#
+#     else:
+#         # 멀티 쓰레딩 Pool 사용
+#         pool = Pool(processes=4)  # 4개의 프로세스를 사용합니다.
+#         pool.map(stock_crawling, code_li)  # pool에 일을 던져줍니다.
+#         print("--- %s seconds ---" % (time.time() - start_time))
 
-if __name__ == '__main__':
-    # 종목리스트 선출
-    daily_df = pd.read_sql("select * from stocksearch.daily_market", conn)
-    code_li = daily_df['ID']
 
-    # 오늘 장이 열렸었는지 확인
-    code = code_li[0]
-    url = f"https://finance.naver.com/item/main.nhn?code={code}"
-    response = requests.get(url)
-    soup = BeautifulSoup(response.content, "html.parser")
-
-    # 장마감 날짜 확인
-    f = soup.select_one("em.date")
-    f.span.decompose()
-    final_day = f.get_text().strip().split()[0]
-    print('today :', today)
-    print('recent open day :', final_day)
-    if today != final_day:
-        print('market is closed today')
-
-    else:
-        # 멀티 쓰레딩 Pool 사용
-        pool = Pool(processes=4)  # 4개의 프로세스를 사용합니다.
-        pool.map(stock_crawling, code_li)  # pool에 일을 던져줍니다.
-        print("--- %s seconds ---" % (time.time() - start_time))
+# test
+daily_df = pd.read_sql("select * from stocksearch.daily_market", conn)
+code_li = daily_df['ID']
+for i in range(887, len(code_li)):
+    code = code_li[i]
+    print(i, code)
+    stock_crawling(code)

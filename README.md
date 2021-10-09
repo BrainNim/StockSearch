@@ -179,6 +179,10 @@
 | updown       | 2     | min,max  </br>(flt,flt)    | ('min' < 유보율 < 'max')에 부합하는 종목          | RetentionFilter.updown=0,20   |
 | continuous   | 1     | quarter  </br>(int)        | 유보율이 'quarter'분기 이상동안 연속 증가한 종목  | RetentionFilter.continuous=5  |
 
+### BongFilter
+| 세부필터     |입력값수| 입력값상세                 | 설명                                             | 쿼리예시                      |
+|--------------|-------|----------------------------|--------------------------------------------------|-------------------------------|
+| shape        | 1     | shape  </br>(str)          | 오늘의 캔들모양이 ('shape')에 부합하는 종목       | BongFilter.shape=Bullish      |
 
 ### 출력 결과(JSON)
 ```

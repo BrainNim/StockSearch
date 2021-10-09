@@ -172,7 +172,7 @@ def stock_crawling(code):
 # test
 daily_df = pd.read_sql("select * from stocksearch.daily_market", conn)
 code_li = daily_df['ID']
-for i in range(887, len(code_li)):
+for i in range(len(code_li)):
     code = code_li[i]
     print(i, code)
     stock_crawling(code)

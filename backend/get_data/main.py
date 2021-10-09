@@ -41,18 +41,19 @@ def stock_crawling(code):
     response = requests.get(url)
     soup = BeautifulSoup(response.content, "html.parser")
 
-    dfs = pd.read_html(url, encoding='euc-kr')  # 페이지 내 모든 테이블
+    dfs = pd.read_html(url, encoding='euc-kr')  # 페이지 내 모든 테이블 (3:분석실적 -8:시가총액, -6:52주최고, -4:동일업종)
 
     # 종목명
     name = soup.select_one("div.wrap_company h2").text
 
     # 마켓(코스피, 코스닥), 업종 크롤링
     market_code = soup.select_one("div.description img")['class'][0].upper()  # 마켓
-    category = soup.select_one("div.section.trade_compare > h4 > em a").text  # 업종
+    cat_id = int(soup.select("div#tab_con1 th a.link_site")[-1]['href'].split("=")[-1])  # 업종 id
+    category = globals()['cat_df'][globals()['cat_df']['ID'] == cat_id]['Category'].values[0]  # 업종
 
     # 시가총액, 52주 최고가
-    capital = txt2int(dfs[5].iloc[0, 1])  # 시가총액
-    highest_price = txt2int(dfs[7].iloc[1, 1].split()[0])  # 52주 최고가
+    capital = txt2int(dfs[-8].iloc[0, 1])  # 시가총액
+    highest_price = txt2int(dfs[-6].iloc[1, 1].split()[0])  # 52주 최고가
 
     # 기업분석실적
     df = dfs[3].set_index(dfs[3].columns[0])
@@ -62,7 +63,7 @@ def stock_crawling(code):
     roe = df.loc['ROE(지배주주)'][-2]
     pbr = df.loc['PBR(배)'][-2]
     bps = df.loc['BPS(원)'][-2]
-    group_per = float(dfs[9].loc[0,1][:-1])  # 동일업종 PER(배)
+    group_per = float(dfs[-4].loc[0,1][:-1])  # 동일업종 PER(배)
 
     revenue = df.loc['매출액'][-2]
     operating_income = df.loc['영업이익'][-2]
@@ -172,7 +173,11 @@ def stock_crawling(code):
 # test
 daily_df = pd.read_sql("select * from stocksearch.daily_market", conn)
 code_li = daily_df['ID']
-for i in range(len(code_li)):
+globals()['cat_df'] = pd.read_sql("SELECT * FROM stocksearch.category;", conn)
+for i in range(1193, len(code_li)):
     code = code_li[i]
     print(i, code)
     stock_crawling(code)
+
+
+code = "071840"

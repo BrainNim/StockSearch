@@ -77,6 +77,22 @@ class PriceFilter:
         return new_df
 
 
+class BongFilter:
+    def __init__(self, conn):
+        self.conn = conn
+
+    def shape(self, shape, df):
+        if shape == 'Bullish':
+            new_df = df[(df['Open'] == df['Low']) & (df['Close'] == df['High'])]
+        elif shape == 'Bearish':
+            new_df = df[(df['Open'] == df['High']) & (df['Close'] == df['Low'])]
+        elif shape == 'Hammer':
+            new_df = df[(df['Close'] == df['High']) & (df['Open'] >= (df['High']+df['Low'])/2)]
+        elif shape == 'InvHammer':
+            new_df = df[(df['Open'] == df['Low']) & (df['Close'] <= (df['High']+df['Low'])/2)]
+        return new_df
+
+
 class VolumeFilter:
     def __init__(self, conn):
         self.conn = conn

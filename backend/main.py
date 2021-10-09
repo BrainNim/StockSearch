@@ -12,13 +12,13 @@ app = Flask(__name__)
 
 ###### Get daily data from Naver ######
 # 스케줄러 설정 (매일 15시 30분 실행)
-from os import system
-from apscheduler.schedulers.background import BackgroundScheduler
-def scheduler():
-    system("""python3 get_data/main.py""")  # 로컬에서 테스트할 때: python / ec2에서 실행할 때: python3
-sched = BackgroundScheduler(daemon=True)
-sched.add_job(scheduler, 'interval', days=1, start_date='2021-10-07 16:10:00')  # 장마감 10초후부터 크롤링
-sched.start()
+# from os import system
+# from apscheduler.schedulers.background import BackgroundScheduler
+# def scheduler():
+#     system("""python3 get_data/main.py""")  # 로컬에서 테스트할 때: python / ec2에서 실행할 때: python3
+# sched = BackgroundScheduler(daemon=True)
+# sched.add_job(scheduler, 'interval', days=1, start_date='2021-10-08 15:30:10')  # 장마감 10초후부터 크롤링
+# sched.start()
 
 
 ###### FILTER LIST #####

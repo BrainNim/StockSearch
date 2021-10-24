@@ -8,7 +8,7 @@ import requests
 import re
 from bs4 import BeautifulSoup
 from multiprocessing import Pool
-import get_code
+
 
 # 시작시간
 start_time = time.time()
@@ -25,8 +25,6 @@ curs = conn.cursor()
 # 종목업종(카테고리) 정보 가져오기
 globals()['cat_df'] = pd.read_sql("SELECT * FROM stocksearch.category;", conn)
 
-# get new code
-# get_code.from_xls(conn)
 
 def txt2int(txt):
     txt_sub = re.sub(',', '', txt)
@@ -56,7 +54,7 @@ def stock_crawling(code):
         return "DELETE"
 
     # 종목명
-    name = soup.select_one("div.wrap_company h2").text
+    # name = soup.select_one("div.wrap_company h2").text
 
     # 마켓(코스피, 코스닥), 업종 크롤링
     market_code = soup.select_one("div.description img")['class'][0].upper()  # 마켓
@@ -150,13 +148,13 @@ def stock_crawling(code):
 
     # daily_market 업데이트
     update_sql_1 = f"""UPDATE stocksearch.daily_market
-                    SET Name = "{name}", Market = "{market_code}", Category="{category}", Capital = {capital},
+                    SET Market = "{market_code}", Category="{category}", Capital = {capital},
                     PER = {per}, EPS = {eps}, ROE = {roe}, PBR = {pbr}, BPS = {bps}, Group_PER = {group_per},
                     Revenue = {revenue}, Operating_Income = {operating_income}, Net_Income = {net_income}, Dividend = {dividend}, 
                     Debt = {debt}, Debt_continuous = {debt_continuous}, Retention = {retention}, Retention_Continuous = {retention_continuous},
                     Open = {open}, High = {high}, Low = {low}, Close = {close}, Volume = {volume}, DaytoDay = {day2day},
                     Highest_Price = {highest_price}, Highest_Date = "{highest_date}"
-                    WHERE ID = "{code}"; """
+                    WHERE ID = "{code}"; """  # Name = "{name}",
     curs.execute(update_sql_1)
 
     # # past_market 업데이트

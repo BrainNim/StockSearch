@@ -1,5 +1,6 @@
 import pymysql
 import pandas as pd
+from tqdm import tqdm
 
 
 def from_xlsx():
@@ -31,7 +32,6 @@ def from_xlsx():
 
         if len(new_code) > 0:
             for code in new_code:
-                name = total_df[total_df['종목코드'] == code]['종목명'].values[0]
                 curs.execute(f"INSERT INTO stocksearch.daily_market (ID) VALUES ('{code}')")
 
             conn.commit()
@@ -44,7 +44,8 @@ def from_xlsx():
             print('Delete :', len(del_code))
 
     # 종목명 update
-    for code, name in zip(total_df['종목코드'], total_df['종목명']):
+    print("Name Update...")
+    for code, name in tqdm(zip(total_df['종목코드'], total_df['종목명'])):
         curs.execute(f"UPDATE stocksearch.daily_market SET Name = '{name}' WHERE ID = '{code}'")
 
     conn.commit()

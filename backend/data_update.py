@@ -14,4 +14,4 @@ if i == 0:
     get_year_data.update(start_num=0, del_chk=True)
 else:
     # daily_update.update(start_num=i*1000)
-    get_year_data.update(start_num=i*1000)
+    get_year_data.update(start_num=i)

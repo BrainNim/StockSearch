@@ -154,7 +154,7 @@ def dic(Dic_SN=None):
     else:
         curs.execute(f"SELECT * FROM stocksearch.dictionary WHERE Dic_SN = {Dic_SN};")
         dic_data = curs.fetchone()
-        answer = dict(zip(['Dic_SN', 'Title', 'Description', 'Condition'], dic_data))
+        answer = dict(zip(['Dic_SN', 'Title', 'Summary', 'Description', 'Condition'], dic_data))
         print(answer)
 
     return json.dumps(answer, ensure_ascii=False, indent=4)

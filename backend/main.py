@@ -189,7 +189,7 @@ def board():
 
     sql = "SELECT Query FROM stocksearch.request_history;"
     board_df = pd.read_sql(sql, conn)
-    # 사용한 필터 수가 2개 이상인 경우에만 살림
+    # 사용한 필터 수가 2개 이상인 경우에만 살림 # 수정필요
     board_df['filter_count'] = board_df.Query.apply(lambda x: len(x.split('&')))
     board_df = board_df[board_df['filter_count'] >= 2]
 

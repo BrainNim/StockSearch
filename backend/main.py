@@ -10,15 +10,14 @@ pd.set_option('display.max_columns', None)
 app = Flask(__name__)
 
 
-###### Get daily data from Naver ######
-# 스케줄러 설정 (매일 15시 30분 실행)
-# from os import system
-# from apscheduler.schedulers.background import BackgroundScheduler
-# def scheduler():
-#     system("""python3 get_data/main.py""")  # 로컬에서 테스트할 때: python / ec2에서 실행할 때: python3
-# sched = BackgroundScheduler(daemon=True)
-# sched.add_job(scheduler, 'interval', days=1, start_date='2021-10-08 15:30:10')  # 장마감 10초후부터 크롤링
-# sched.start()
+###### CONNECT DB ######
+def connect_db():
+    # mysql connecting info & connect
+    key_df = pd.read_csv('aws_db_key.txt', header=None)
+    host, user, password, db = key_df[0][0], key_df[0][1], key_df[0][2], key_df[0][3]
+    conn = pymysql.connect(host=host, user=user, password=password, db=db)
+    curs = conn.cursor()
+    return conn, curs
 
 
 ###### FILTER LIST #####
@@ -28,10 +27,7 @@ app = Flask(__name__)
 @app.route('/filter_li/<int:Filter_SN>', methods=['GET', ])
 def filter_li(Filter_SN=None):
     # mysql connecting info & connect
-    key_df = pd.read_csv('aws_db_key.txt', header=None)
-    host, user, password, db = key_df[0][0], key_df[0][1], key_df[0][2], key_df[0][3]
-    conn = pymysql.connect(host=host, user=user, password=password, db=db)
-    curs = conn.cursor()
+    conn, curs = connect_db()
 
     if Filter_SN == None:
         df = pd.read_sql("SELECT FL_SN, Filter, Filter_KOR, Subfilter, Subfilter_KOR FROM stocksearch.filter_list;", conn)
@@ -74,10 +70,7 @@ def filter():
     start_time = time.time()
 
     # mysql connecting info & connect
-    key_df = pd.read_csv('aws_db_key.txt', header=None)
-    host, user, password, db = key_df[0][0], key_df[0][1], key_df[0][2], key_df[0][3]
-    conn = pymysql.connect(host=host, user=user, password=password, db=db)
-    curs = conn.cursor()
+    conn, curs = connect_db()
 
     df = pd.read_sql("select * from stocksearch.daily_market", conn)
 
@@ -142,10 +135,7 @@ def filter():
 @app.route('/dictionary/<int:Dic_SN>', methods=['GET', ])
 def dic(Dic_SN=None):
     # mysql connecting info & connect
-    key_df = pd.read_csv('aws_db_key.txt', header=None)
-    host, user, password, db = key_df[0][0], key_df[0][1], key_df[0][2], key_df[0][3]
-    conn = pymysql.connect(host=host, user=user, password=password, db=db)
-    curs = conn.cursor()
+    conn, curs = connect_db()
 
     if Dic_SN == None:
         total_df = pd.read_sql("SELECT Dic_SN, Title FROM stocksearch.dictionary;", conn)
@@ -168,7 +158,7 @@ def save_request_log(request, curs, conn):
     conn.commit()
 
 
-# 전체쿼리문 -> 필터명 전처리 함수
+# 전체쿼리문 -> 필터명만 뽑아내는 전처리 함수
 def proc_query(query):
     query_li = query.split('&')
     proc_str = ''
@@ -178,31 +168,43 @@ def proc_query(query):
     return proc_str
 
 
-# http://127.0.0.1:5000/board
-@app.route('/board/', methods=['GET', ])
-def board():
+# http://127.0.0.1:5000/board/recent
+@app.route('/board/recent/', methods=['GET', ])
+def board_recent():
     # mysql connecting info & connect
-    key_df = pd.read_csv('aws_db_key.txt', header=None)
-    host, user, password, db = key_df[0][0], key_df[0][1], key_df[0][2], key_df[0][3]
-    conn = pymysql.connect(host=host, user=user, password=password, db=db)
-    curs = conn.cursor()
+    conn, curs = connect_db()
 
-    sql = "SELECT Query FROM stocksearch.request_history;"
+    # 최근 7일 내 검색기록 조회
+    sql = "SELECT * FROM stocksearch.request_history WHERE date(update_date) >= date(now())-7 ORDER BY update_date DESC;"
     board_df = pd.read_sql(sql, conn)
-    # 사용한 필터 수가 2개 이상인 경우에만 살림
-    board_df['filter_count'] = board_df.Query.apply(lambda x: len(x.split('&')))
-    board_df = board_df[board_df['filter_count'] >= 2]
-
-    # 값을 제거하고 이용한 필터만 뽑아내기
+    # 필터조합,순서가 일치하는 검색기록은 drop, 최신 10개 검색기록만 제공
     board_df['filter_ori'] = board_df.Query.apply(lambda x: proc_query(x))
-    # 각 필터조합 당 수 세기
-    query_count = Counter(list(board_df.filter_ori))
-    board_df['duplicated_count'] = board_df.apply(lambda x: query_count[x['filter_ori']], axis=1)
-    # 정렬, 칼럼 drop
-    board_df = board_df.sort_values(by='duplicated_count', ascending=False).drop_duplicates(['filter_ori']).head(5)
+    board_df = board_df.drop_duplicates(['filter_ori']).head(10)
 
     return board_df[['Query']].to_json(orient='index')
 
 
+# http://127.0.0.1:5000/board/famous
+@app.route('/board/famous/', methods=['GET', ])
+def board_famous():
+    # mysql connecting info & connect
+    conn, curs = connect_db()
+
+    # 최근 7일 내 검색기록 조회
+    sql = "SELECT * FROM stocksearch.request_history WHERE date(update_date) >= date(now())-7 ORDER BY update_date DESC;"
+    board_df = pd.read_sql(sql, conn)
+    # 각 필터 별 개수 확인
+    history = []
+    for f in board_df.Query:
+        f_li = f.split('&')
+        for f_detail in f_li:
+            history.append(f_detail)
+    query_count = Counter(history)
+    # 상위 개수 선출
+    queries = sorted(query_count, key=query_count.get, reverse=True)
+
+    return json.dumps(queries[:10])
+
+
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', debug=True, threaded=True)
+    app.run(host='0.0.0.0', debug=False, threaded=True)

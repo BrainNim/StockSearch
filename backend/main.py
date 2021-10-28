@@ -168,29 +168,6 @@ def proc_query(query):
     return proc_str
 
 
-# http://127.0.0.1:5000/board
-@app.route('/board/', methods=['GET', ])
-def board():
-    # mysql connecting info & connect
-    conn, curs = connect_db()
-
-    sql = "SELECT Query FROM stocksearch.request_history;"
-    board_df = pd.read_sql(sql, conn)
-    # 사용한 필터 수가 2개 이상인 경우에만 살림 # 수정필요
-    board_df['filter_count'] = board_df.Query.apply(lambda x: len(x.split('&')))
-    board_df = board_df[board_df['filter_count'] >= 2]
-
-    # 값을 제거하고 이용한 필터만 뽑아내기
-    board_df['filter_ori'] = board_df.Query.apply(lambda x: proc_query(x))
-    # 각 필터조합 당 수 세기
-    query_count = Counter(list(board_df.filter_ori))
-    board_df['duplicated_count'] = board_df.apply(lambda x: query_count[x['filter_ori']], axis=1)
-    # 정렬, 칼럼 drop
-    board_df = board_df.sort_values(by='duplicated_count', ascending=False).drop_duplicates(['filter_ori']).head(5)
-
-    return board_df[['Query']].to_json(orient='index')
-
-
 # http://127.0.0.1:5000/board/recent
 @app.route('/board/recent/', methods=['GET', ])
 def board_recent():
@@ -214,7 +191,7 @@ def board_famous():
     conn, curs = connect_db()
 
     # 최근 7일 내 검색기록 조회
-    sql = "SELECT * FROM stocksearch.request_history WHERE date(update_date) <= date(now())-7 ORDER BY update_date DESC;"
+    sql = "SELECT * FROM stocksearch.request_history WHERE date(update_date) >= date(now())-7 ORDER BY update_date DESC;"
     board_df = pd.read_sql(sql, conn)
     # 각 필터 별 개수 확인
     history = []
@@ -223,11 +200,10 @@ def board_famous():
         for f_detail in f_li:
             history.append(f_detail)
     query_count = Counter(history)
+    # 상위 개수 선출
     queries = sorted(query_count, key=query_count.get, reverse=True)
-    queries
 
-    board_df['filter_ori'] = board_df.Query.apply(lambda x: proc_query(x))
-
+    return json.dumps(queries[:10])
 
 
 if __name__ == "__main__":

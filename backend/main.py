@@ -207,6 +207,28 @@ def board_recent():
     return board_df[['Query']].to_json(orient='index')
 
 
+# http://127.0.0.1:5000/board/famous
+@app.route('/board/famous/', methods=['GET', ])
+def board_famous():
+    # mysql connecting info & connect
+    conn, curs = connect_db()
+
+    # 최근 7일 내 검색기록 조회
+    sql = "SELECT * FROM stocksearch.request_history WHERE date(update_date) <= date(now())-7 ORDER BY update_date DESC;"
+    board_df = pd.read_sql(sql, conn)
+    # 각 필터 별 개수 확인
+    history = []
+    for f in board_df.Query:
+        f_li = f.split('&')
+        for f_detail in f_li:
+            history.append(f_detail)
+    query_count = Counter(history)
+    queries = sorted(query_count, key=query_count.get, reverse=True)
+    queries
+
+    board_df['filter_ori'] = board_df.Query.apply(lambda x: proc_query(x))
+
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=False, threaded=True)

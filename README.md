@@ -95,7 +95,7 @@
 },
 "user_view":{
    "description":"해당필터설명",
-   "default":"필터기본입력값(디폴트값)",
+   "limit":"필터입력값제한범위",
    "ux_category":"카테고리번호"
 }
 ```
@@ -106,16 +106,16 @@
 
 ```json
 {
-   "name":"category",
-   "kor_name":"업종",
+   "name":"updown",
+   "kor_name":"이상/이하 범위",
    "input":{
-      "type":"category",
-      "data_format":"str"
+      "type":"min,max",
+      "data_format":"int,int"
    },
    "user_view":{
-      "description":"종목의 업종",
-      "default":"자동차",
-      "ux_category":1
+      "description":"('min' < 현재가 < 'max')에 부합하는 종목",
+      "limit":"0,9999999",
+      "ux_category":2
    }
 }
 ```

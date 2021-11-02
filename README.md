@@ -301,8 +301,88 @@
 
 
 ## 게시판조회
-요청예시)  
-``` localhost:5000/board/ ```  
 
-#### 검색 횟수 상위의 필터조합 조회
-``` /board/ ```
+### 유저들의 최신 검색조합 조회 (최신 10개)
+``` http://127.0.0.1:5000/board/recent/ ```  
+
+#### 출력결과(JSON)
+```json
+{
+   "번호":{"Query":"검색조건쿼리"},
+   "번호":{"Query":"검색조건쿼리"}, ...
+}
+```
+
+
+<details>
+<summary>출력예시 (접기/펼치기)</summary>
+<div markdown="1">
+
+```json
+{
+   "0":{
+      "Query":"MarketFilter.market=KOSPI"
+   },
+   "1":{
+      "Query":"MarketFilter.market=KOSPI&PriceFilter.compare_max=0.7"
+   },
+   "2":{
+      "Query":"MarketFilter.market=KOSPI&PriceFilter.updown=1000,10000&PriceFilter.compare_max=0.7"
+   },
+   "4":{
+      "Query":"PriceFilter.compare_mean=60,0.8,down"
+   },
+   "6":{
+      "Query":"VolumeFilter.compare_mean=60,0.5,down"
+   },
+   "9":{
+      "Query":"MarketFilter.market=KOSPI&PriceFilter.updown=1000,10000&PriceFilter.compare_max=0.7&CrossFilter.goldencross=5,20"
+   },
+   "10":{
+      "Query":"CrossFilter.goldencross=5,20"
+   },
+   "15":{
+      "Query":"RetentionFilter.updown=100,999999"
+   },
+   "16":{
+      "Query":"DebtFilter.updown=0,200"
+   },
+   "17":{
+      "Query":"DebtFilter.continuous=5"
+   }
+}
+```
+</div>
+</details>
+
+
+
+### 유저들의 최근 사용인기 필터 조회 (근 7일 내, 사용횟수 상위 10개)
+``` http://127.0.0.1:5000/board/famous/ ```  
+
+#### 출력결과(JSON)
+```json
+["검색조건쿼리", "검색조건쿼리", ...]
+```
+
+
+<details>
+<summary>출력예시 (접기/펼치기)</summary>
+<div markdown="1">
+
+```json
+[
+   "MarketFilter.market=KOSPI",
+   "PriceFilter.compare_max=0.7",
+   "PriceFilter.updown=1000,10000",
+   "CrossFilter.goldencross=5,20",
+   "PriceFilter.compare_mean=60,0.8,down",
+   "VolumeFilter.compare_mean=60,5,up",
+   "PERFilter.compare_group=0.5,down",
+   "PriceFilter.compare_mean=60,0.5,down",
+   "VolumeFilter.compare_mean=60,0.5,down",
+   "RetentionFilter.updown=100,999999"
+]
+```
+</div>
+</details>

@@ -1,6 +1,5 @@
 # StockSearch (가제: 나도주주, 주린이를 위한 기술분석서치 가이드)
 기술분석과 투자를 위한 주식종목검색 어플리케이션 개발
-(pip install lxml, bs4, pandas, )
 
 ## 필터조회
 
